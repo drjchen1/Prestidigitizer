@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prestidigitizer - Accessible Math Digitizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23CEB888%22/><text y=%22.9em%22 x=%2250%25%22 font-family=%22serif%22 font-style=%22italic%22 font-weight=%22bold%22 font-size=%2270%22 text-anchor=%22middle%22 fill=%22%230f172a%22>P</text></svg>">
+  <!-- MathJax Config -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        enableMenu: true
+      },
+      startup: {
+        pageReady: () => {
+          return MathJax.startup.defaultPageReady();
+        }
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code&family=Silkscreen&family=Pixelify+Sans:wght@400..700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .math-content { 
+      font-family: 'Crimson Pro', serif; 
+      font-size: 1.25rem;
+      line-height: 1.6;
+    }
+    .math-content h1, .math-content h2, .math-content h3 {
+      font-family: 'Inter', sans-serif;
+    }
+    .math-content figure {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #fafaf9;
+      border: 1px solid #f1f5f9;
+      border-radius: 1rem;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow-x: auto;
+      display: block;
+    }
+    .math-content figcaption {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      color: #334155;
+      margin-top: 1rem;
+      font-style: italic;
+      font-weight: 500;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      hyphens: auto;
+    }
+
+    /* Responsive fixes for AI generated content */
+    .math-content img, 
+    .math-content svg, 
+    .math-content video {
+      max-width: 100% !important;
+      height: auto !important;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Allow horizontal scrolling for wide math equations */
+    .math-content .MathJax_Display,
+    .math-content mjx-container[display="true"] {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 0.5rem;
+    }
+
+    /* Allow horizontal scrolling for wide tables */
+    .math-content table {
+      max-width: 100%;
+      overflow-x: auto;
+      display: block;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen selection:bg-amber-100">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
