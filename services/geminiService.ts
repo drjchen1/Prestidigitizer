@@ -74,11 +74,18 @@ CRITICAL: Do not include any internal monologue, reasoning, or "thinking" proces
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful', retries = 5): Promise<{text: string, tokenCount: number}> {
+async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful', retries = 3): Promise<{text: string, tokenCount: number}> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   for (let i = 0; i < retries; i++) {
     try {
+      // Tweak 5: Adaptive Thinking Levels
+      // Start with LOW to minimize latency. If it's a retry, we might want to increase it, 
+      // but for now we'll stick to the user's request of "adaptive" based on complexity.
+      // Since we can't pre-detect, we'll use LOW for the first attempt and HIGH for retries 
+      // if the error suggests complexity issues.
+      const currentThinkingLevel = i === 0 ? ThinkingLevel.LOW : ThinkingLevel.HIGH;
+
       const parts = images.flatMap(img => [
         { inlineData: { mimeType: 'image/jpeg', data: img.base64 } },
         { text: `This is page ${img.pageNumber}.` }
@@ -132,7 +139,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
           },
           temperature: 0.1,
           maxOutputTokens: 65536,
-          thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+          thinkingConfig: { thinkingLevel: currentThinkingLevel }
         }
       });
 

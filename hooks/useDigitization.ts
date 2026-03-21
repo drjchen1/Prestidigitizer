@@ -7,6 +7,8 @@ import { runAccessibilityAudit } from '../utils/accessibility';
 import { cropImage } from '../utils/image';
 import { cleanAltText } from '../utils/dom';
 
+import { optimizeImageForGemini } from '../utils/imageOptimizer';
+
 export const useDigitization = () => {
   const [state, setState] = useState<AppState>({
     isProcessing: false,
@@ -89,18 +91,31 @@ export const useDigitization = () => {
 
       const processBatch = async (batchIndices: number[]) => {
         try {
-          const batchImages = batchIndices.map(idx => ({
-            base64: pageData[idx].base64,
-            pageNumber: idx + 1
+          setState(prev => ({ 
+            ...prev, 
+            statusMessage: `Optimizing images for Pages ${batchIndices.map(i => i + 1).join(', ')}...`,
+          }));
+
+          const batchImages = await Promise.all(batchIndices.map(async idx => {
+            const optimized = await optimizeImageForGemini(pageData[idx].base64);
+            return {
+              base64: optimized,
+              pageNumber: idx + 1
+            };
           }));
 
           setState(prev => ({ 
             ...prev, 
-            statusMessage: `Digitizing Pages ${batchIndices.map(i => i + 1).join(', ')} of ${totalPages}...`,
+            statusMessage: `Digitizing Pages ${batchIndices.map(i => i + 1).join(', ')}...`,
           }));
 
           const batchResponses = await convertBatchToHtml(batchImages, languageLevel);
           incrementUsage();
+
+          setState(prev => ({ 
+            ...prev, 
+            statusMessage: `Processing mathematical figures for Pages ${batchIndices.map(i => i + 1).join(', ')}...`,
+          }));
 
           for (let k = 0; k < batchIndices.length; k++) {
             const i = batchIndices[k];
