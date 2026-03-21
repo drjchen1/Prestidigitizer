@@ -109,8 +109,16 @@ const ProcessingOverlay: React.FC<ProcessingOverlayProps> = ({ progress, status 
           </div>
           
           <div className="space-y-4 mb-8">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Digitizing
+            <h2 className="text-3xl font-black tracking-tight">
+              <span className="text-black">Presti</span>
+              <motion.span 
+                animate={{ opacity: [1, 0.4, 1] }} 
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                className="text-purdue"
+                style={{ fontFamily: "'Pixelify Sans', sans-serif", fontWeight: 700, fontSize: '1.05em', verticalAlign: 'baseline', display: 'inline-block', transform: 'translateY(0.02em)' }}
+              >
+                digitizing
+              </motion.span>
             </h2>
             <div className="h-12 overflow-hidden flex justify-center items-center">
               <AnimatePresence mode="wait">
