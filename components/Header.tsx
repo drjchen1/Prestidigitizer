@@ -13,8 +13,8 @@ const Header: React.FC<HeaderProps> = ({ onShowDocs }) => {
           <div className="bg-purdue text-slate-900 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg md:rounded-xl shadow-lg shadow-slate-200 flex-shrink-0">
             <span className="text-xl md:text-2xl font-serif italic font-bold leading-none select-none transform -translate-y-0.5">P</span>
           </div>
-          <h1 className="text-[32px] md:text-[40px] font-black tracking-tighter truncate md:whitespace-normal pr-2 leading-none flex items-center">
-            <span className="text-black">Presti</span><span className="text-purdue" style={{ fontFamily: "'Pixelify Sans', sans-serif", fontWeight: 700, fontSize: '1.05em', verticalAlign: 'baseline', display: 'inline-block', transform: 'translateY(0.02em)' }}>digitizer</span>
+          <h1 className="text-[32px] md:text-[40px] font-black tracking-tighter md:whitespace-normal pr-2 flex items-center">
+            <span className="text-black">Presti</span><span className="text-purdue font-bold">digitizer</span>
           </h1>
         </div>
         

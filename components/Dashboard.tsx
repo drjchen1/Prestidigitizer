@@ -51,7 +51,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
           <span className="text-3xl md:text-4xl font-serif italic font-bold leading-none select-none transform -translate-y-1">P</span>
         </div>
         <h1 className="text-[48px] md:text-[64px] font-black tracking-tighter leading-none flex items-center">
-          <span className="text-black">Presti</span><span className="text-purdue" style={{ fontFamily: "'Pixelify Sans', sans-serif", fontWeight: 700, fontSize: '1.05em', verticalAlign: 'baseline', display: 'inline-block', transform: 'translateY(0.02em)' }}>digitizer</span>
+          <span className="text-black">Presti</span><span className="text-purdue font-bold">digitizer</span>
         </h1>
       </div>
 
@@ -67,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
         }`}
       >
         <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-8 whitespace-normal md:whitespace-nowrap">
-          Ready to <span className="text-purdue" style={{ fontFamily: "'Pixelify Sans', sans-serif", fontWeight: 700, fontSize: '1.05em', verticalAlign: 'baseline', display: 'inline-block', transform: 'translateY(0.02em)' }}>Digitize.</span>
+          Ready to <span className="text-purdue font-bold">Digitize.</span>
         </h2>
         
         <div>

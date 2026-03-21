@@ -114,8 +114,7 @@ const ProcessingOverlay: React.FC<ProcessingOverlayProps> = ({ progress, status 
               <motion.span 
                 animate={{ opacity: [1, 0.4, 1] }} 
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                className="text-purdue"
-                style={{ fontFamily: "'Pixelify Sans', sans-serif", fontWeight: 700, fontSize: '1.05em', verticalAlign: 'baseline', display: 'inline-block', transform: 'translateY(0.02em)' }}
+                className="text-purdue font-bold"
               >
                 digitizing
               </motion.span>
