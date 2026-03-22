@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
-import { GeminiPageResponse, LanguageLevel, BatchResponse } from "../types";
+import { GeminiPageResponse, LanguageLevel, BatchResponse, ModelType } from "../types";
 
 const getSystemInstruction = (level: LanguageLevel) => {
   let adaptationInstruction = "";
@@ -74,7 +74,7 @@ CRITICAL: Do not include any internal monologue, reasoning, or "thinking" proces
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful', retries = 3): Promise<{text: string, tokenCount: number}> {
+async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview', retries = 3): Promise<{text: string, tokenCount: number}> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   for (let i = 0; i < retries; i++) {
@@ -99,7 +99,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
       Ensure the output is complete and does not cut off.` });
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: model,
         contents: { parts },
         config: {
           systemInstruction: getSystemInstruction(level) + "\nIMPORTANT: Return a JSON object with a 'pages' property containing an array of page results. Each page result must have 'html' and 'figures' properties.",
@@ -166,10 +166,10 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
   throw new Error("Max retries exceeded");
 }
 
-export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful'): Promise<BatchResponse> => {
+export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview'): Promise<BatchResponse> => {
   let result = { text: "", tokenCount: 0 };
   try {
-    result = await callBatchGeminiWithRetry(images, level);
+    result = await callBatchGeminiWithRetry(images, level, model);
     const parsed = JSON.parse(result.text);
     return { pages: parsed.pages as GeminiPageResponse[], tokenCount: result.tokenCount };
   } catch (error: any) {
@@ -178,11 +178,11 @@ export const convertBatchToHtml = async (images: { base64: string, pageNumber: n
   }
 };
 
-export const describeFigure = async (base64Image: string): Promise<{result: string, tokenCount: number}> => {
+export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3-flash-preview'): Promise<{result: string, tokenCount: number}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: model,
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/png', data: base64Image.split(',')[1] || base64Image } },

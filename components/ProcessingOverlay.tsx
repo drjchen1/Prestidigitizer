@@ -40,7 +40,9 @@ const FloatingMath = () => {
   );
 };
 
-const ProcessingOverlay: React.FC<ProcessingOverlayProps> = ({ progress, status }) => {
+const ProcessingOverlay: React.FC<ProcessingOverlayProps> = ({ progress }) => {
+  const isDone = progress >= 100;
+
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-6 text-center overflow-hidden">
       {/* Immersive background */}
@@ -52,87 +54,37 @@ const ProcessingOverlay: React.FC<ProcessingOverlayProps> = ({ progress, status 
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="relative z-10 bg-white/80 backdrop-blur-3xl rounded-[3rem] p-12 max-w-md w-full border border-slate-200 shadow-2xl"
+        className="relative z-10 bg-white/40 backdrop-blur-3xl rounded-[3rem] p-12 max-w-md w-full border border-white/20 shadow-2xl"
       >
         <FloatingMath />
         
-        <div className="relative z-10">
-          <div className="mb-8 flex justify-center">
-            <div className="relative w-48 h-48 flex items-center justify-center">
-              {/* Progress Ring SVG */}
-              <svg className="absolute inset-0 w-full h-full -rotate-90">
-                <circle
-                  cx="96"
-                  cy="96"
-                  r="88"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-slate-100"
-                />
-                <motion.circle
-                  cx="96"
-                  cy="96"
-                  r="88"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  className="text-purdue"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: progress / 100 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                />
-              </svg>
-
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-full max-w-[320px]">
+            <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden border-2 border-slate-200/50">
               <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="w-40 h-40 border border-slate-100 rounded-full border-dashed flex items-center justify-center"
+                className="h-full bg-purdue"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
               />
-              
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <motion.div 
-                  key={Math.round(progress)}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="flex items-baseline"
-                >
-                  <span className="text-6xl font-black text-slate-900 tracking-tighter">
-                    {Math.round(progress)}
-                  </span>
-                  <span className="text-xl font-black text-purdue ml-1">%</span>
-                </motion.div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mt-2">Processing</span>
-              </div>
+            </div>
+            <div className="mt-4 flex justify-between items-center px-2">
+              <span className="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">
+                {isDone ? 'Complete' : 'Magic in progress'}
+              </span>
+              <span className="text-sm font-black text-purdue">{Math.round(progress)}%</span>
             </div>
           </div>
           
-          <div className="space-y-4 mb-8">
-            <h2 className="text-3xl font-black tracking-tight">
-              <span className="text-black">Presti</span>
-              <motion.span 
-                animate={{ opacity: [1, 0.4, 1] }} 
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                className="text-purdue font-bold"
-              >
-                digitizing
-              </motion.span>
-            </h2>
-            <div className="h-12 overflow-hidden flex justify-center items-center">
-              <AnimatePresence mode="wait">
-                <motion.p 
-                  key={status}
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -10, opacity: 0 }}
-                  className="text-slate-500 font-bold text-[10px] uppercase tracking-widest leading-relaxed max-w-[280px]"
-                >
-                  {status}
-                </motion.p>
-              </AnimatePresence>
-            </div>
-          </div>
+          {isDone && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8"
+            >
+              <h2 className="text-4xl font-black tracking-tighter text-purdue">Done!</h2>
+            </motion.div>
+          )}
         </div>
       </motion.div>
     </div>

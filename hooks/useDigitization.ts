@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppState, ConversionResult, LanguageLevel } from '../types';
+import { AppState, ConversionResult, LanguageLevel, ModelType } from '../types';
 import { pdfToImageData } from '../services/pdfService';
 import { convertBatchToHtml } from '../services/geminiService';
 import { runAccessibilityAudit } from '../utils/accessibility';
@@ -17,7 +17,8 @@ export const useDigitization = () => {
     error: null,
     statusMessage: 'Waiting for upload...',
     sessionRequestCount: 0,
-    dailyRequestCount: 0
+    dailyRequestCount: 0,
+    selectedModel: 'gemini-3-flash-preview'
   });
 
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -64,7 +65,7 @@ export const useDigitization = () => {
     });
   }, []);
 
-  const handleFileUpload = async (file: File, languageLevel: LanguageLevel = 'faithful') => {
+  const handleFileUpload = async (file: File, languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview') => {
     if (!file) return;
 
     setOriginalFile(file);
@@ -88,6 +89,11 @@ export const useDigitization = () => {
       const CONCURRENCY_LIMIT = 2;
       const results: ConversionResult[] = new Array(totalPages);
       let completedPages = 0;
+      
+      const progressPerPage = 90 / totalPages;
+      const OPTIMIZATION_WEIGHT = 0.2;
+      const AI_WEIGHT = 0.6;
+      const FIGURE_WEIGHT = 0.2;
 
       const processBatch = async (batchIndices: number[]) => {
         try {
@@ -106,14 +112,16 @@ export const useDigitization = () => {
 
           setState(prev => ({ 
             ...prev, 
+            progress: Math.min(99, prev.progress + (batchIndices.length * progressPerPage * OPTIMIZATION_WEIGHT)),
             statusMessage: `Digitizing Pages ${batchIndices.map(i => i + 1).join(', ')}...`,
           }));
 
-          const batchResponses = await convertBatchToHtml(batchImages, languageLevel);
+          const batchResponses = await convertBatchToHtml(batchImages, languageLevel, model);
           incrementUsage();
 
           setState(prev => ({ 
             ...prev, 
+            progress: Math.min(99, prev.progress + (batchIndices.length * progressPerPage * AI_WEIGHT)),
             statusMessage: `Processing mathematical figures for Pages ${batchIndices.map(i => i + 1).join(', ')}...`,
           }));
 
@@ -168,7 +176,7 @@ export const useDigitization = () => {
             completedPages++;
             setState(prev => ({
               ...prev,
-              progress: Math.max(prev.progress, (completedPages / totalPages) * 100),
+              progress: Math.min(99, prev.progress + (progressPerPage * FIGURE_WEIGHT)),
               statusMessage: `Completed ${completedPages} of ${totalPages} pages...`,
               results: results.filter(r => r !== undefined).sort((a, b) => a.pageNumber - b.pageNumber)
             }));
@@ -278,19 +286,24 @@ export const useDigitization = () => {
     });
   };
 
+  const setModel = useCallback((model: ModelType) => {
+    setState(prev => ({ ...prev, selectedModel: model }));
+  }, []);
+
   const reset = useCallback(() => {
-    setState({
+    setState(prev => ({
       isProcessing: false,
       progress: 0,
       results: [],
       error: null,
       statusMessage: 'Waiting for upload...',
       sessionRequestCount: 0,
-      dailyRequestCount: state.dailyRequestCount // Keep daily count
-    });
+      dailyRequestCount: prev.dailyRequestCount, // Keep daily count
+      selectedModel: prev.selectedModel // Keep selected model
+    }));
     setOriginalFile(null);
     setElapsedTime(0);
-  }, [state.dailyRequestCount]);
+  }, []);
 
   return {
     state,
@@ -299,6 +312,7 @@ export const useDigitization = () => {
     handleFileUpload,
     saveEditedFigure,
     incrementUsage,
+    setModel,
     reset
   };
 };

@@ -9,6 +9,7 @@ import ResultsView from './components/ResultsView';
 import AccessibilityAuditReport from './components/AccessibilityAuditReport';
 import HelpModal from './components/HelpModal';
 import { useDigitization } from './hooks/useDigitization';
+import { ModelType } from './types';
 
 const App: React.FC = () => {
   const {
@@ -18,6 +19,7 @@ const App: React.FC = () => {
     handleFileUpload,
     saveEditedFigure,
     incrementUsage,
+    setModel,
     reset
   } = useDigitization();
 
@@ -569,7 +571,6 @@ const App: React.FC = () => {
       {state.isProcessing && (
         <ProcessingOverlay 
           progress={state.progress} 
-          status={state.statusMessage} 
         />
       )}
 
@@ -651,13 +652,24 @@ const App: React.FC = () => {
         {!state.results.length && !state.isProcessing ? (
           <>
             <Dashboard 
-              onFileUpload={handleFileUpload} 
+              onFileUpload={(file, level) => handleFileUpload(file, level, state.selectedModel)} 
               isProcessing={state.isProcessing} 
               onShowDocs={() => setShowHelp(true)}
             />
-            <footer className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-none select-none z-0">
-              <div className="text-[9px] font-mono text-slate-400 uppercase tracking-[0.3em]">
-                © 2026 KUAN-HUA CHEN // LIBERATED LOGIC // MODIFY AT WILL
+            <footer className="fixed bottom-6 left-0 right-0 flex flex-col items-center gap-2 pointer-events-none select-none z-0">
+              <div className="flex items-center gap-4 pointer-events-auto">
+                <select 
+                  value={state.selectedModel}
+                  onChange={(e) => setModel(e.target.value as ModelType)}
+                  className="bg-transparent text-[9px] font-mono text-slate-300 uppercase tracking-widest border-none focus:ring-0 cursor-pointer hover:text-slate-500 transition-colors"
+                >
+                  <option value="gemini-3-flash-preview">Flash 3</option>
+                  <option value="gemini-3.1-flash-lite-preview">Flash 3.1 Lite</option>
+                </select>
+                <div className="w-1 h-1 bg-slate-200 rounded-full" />
+                <div className="text-[9px] font-mono text-slate-400 uppercase tracking-[0.3em]">
+                  © 2026 KUAN-HUA CHEN // LIBERATED LOGIC // MODIFY AT WILL
+                </div>
               </div>
             </footer>
           </>
