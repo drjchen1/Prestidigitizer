@@ -48,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
       {/* 1. Top: Prestidigitizer Title and Branding */}
       <div className="flex items-center gap-4 md:gap-6 mb-12">
         <div className="bg-purdue text-slate-900 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-xl md:rounded-2xl shadow-xl shadow-slate-200 flex-shrink-0">
-          <span className="text-3xl md:text-4xl font-serif italic font-bold leading-none select-none transform -translate-y-1">P</span>
+          <span className="text-3xl md:text-4xl font-serif italic font-bold leading-none select-none translate-x-0.5">P</span>
         </div>
         <h1 className="text-[48px] md:text-[64px] font-black tracking-tighter leading-none flex items-center">
           <span className="text-black">Presti</span><span className="text-purdue font-bold">digitizer</span>
@@ -79,10 +79,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
       </div>
 
       {/* 5. Bottom Links */}
-      <div className="mt-12 flex items-center justify-center gap-6 md:gap-10 text-[11px] md:text-sm font-black text-slate-400 uppercase tracking-widest">
-        <button onClick={onShowDocs} className="hover:text-purdue transition-colors">How to Use</button>
-        <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" rel="noopener noreferrer" className="hover:text-purdue transition-colors">WCAG 2.2 AA</a>
-        <span className="select-none opacity-50">v1.0.0</span>
+      <div className="mt-12 flex items-center justify-center gap-8 md:gap-12 text-xs md:text-sm font-black text-slate-600 uppercase tracking-widest">
+        <button 
+          onClick={onShowDocs} 
+          className="p-0 m-0 bg-transparent border-none hover:text-purdue transition-colors cursor-pointer"
+        >
+          HOW TO USE
+        </button>
+        <a 
+          href="https://www.w3.org/WAI/standards-guidelines/wcag/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="hover:text-purdue transition-colors"
+        >
+          WCAG 2.2 AA
+        </a>
       </div>
     </div>
   );
