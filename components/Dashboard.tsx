@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
+import { LanguageLevel } from '../types';
 
 interface DashboardProps {
-  onFileUpload: (file: File) => void;
+  onFileUpload: (file: File, languageLevel: LanguageLevel) => void;
   isProcessing: boolean;
   onShowDocs: () => void;
 }
@@ -13,7 +14,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      onFileUpload(file);
+      onFileUpload(file, 'faithful');
     }
   };
 
@@ -38,7 +39,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
 
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      onFileUpload(file);
+      onFileUpload(file, 'faithful');
     }
   };
 
