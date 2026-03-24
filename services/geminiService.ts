@@ -18,13 +18,15 @@ Rules:
    - TYPOGRAPHY: Use 'font-sans' for a clean, readable look. For headings, use 'font-black tracking-tight text-slate-900'.
    - SPACING: Use 'mb-6' for paragraphs and 'mt-10 mb-4' for headings to create a clear visual rhythm.
    - VISUAL HIERARCHY: Use 'border-l-4 border-purdue pl-6 my-8 italic text-slate-700' for important theorems or definitions.
-   - MATHEMATICS: Ensure block math '\\[ ... \\]' is wrapped in a '<div class="my-8 overflow-x-auto py-4 bg-slate-50 rounded-xl px-6 border border-slate-200 shadow-sm">'. CRITICAL: If a sequence of math symbols and text forms a single logical line or diagram (e.g., f(t) -> L -> F(s)), you MUST group the entire sequence into a SINGLE block math expression '\\[ ... \\]' within ONE wrapper div. NEVER create multiple adjacent block math containers for parts of the same equation or diagram. For sentences with math (e.g., "solve x' = Ax where x is a vector"), PREFER using inline math '\( ... \)' within a standard paragraph tag to maintain a natural flow. Use a neutral, muted stone/slate palette. NEVER use green (e.g., bg-green-50, border-green-200) for any boxes or backgrounds.
+   - MATHEMATICS: Ensure block math '\\[ ... \\]' is wrapped in a '<div class="my-8 overflow-x-auto py-4 bg-slate-50 rounded-xl px-6 border border-slate-200 shadow-sm">' to make it stand out and be readable. Use a neutral, muted stone/slate palette. NEVER use green (e.g., bg-green-50, border-green-200) for any boxes or backgrounds.
    - LISTS: Use 'list-disc list-inside space-y-2 ml-4 mb-6' for unordered lists.
    - NOTEPADS/BOXES: For boxed annotations or important notes, use '<div class="notebox">'. Ensure these boxes use the 'notebox' class and NEVER use green backgrounds or borders.
 4. MATHEMATICS (CRITICAL): Convert all mathematical expressions into LaTeX. 
-   - Use \( ... \) for inline math. PREFER inline math for variables, short expressions, or math that is part of a sentence or has nearby text labels (e.g., "solve \( x' = Ax \) where \( x \) is a vector").
-   - Use \[ ... \] for standalone, complex equations that require their own line.
-   - Ensure backslashes are present for all functions (e.g., \sin, \cos, \log, \sqrt, \times).
+   - PREFER INLINE MATH: Use \\( ... \\) for variables, short expressions, or any math that is part of a sentence or has nearby text labels (e.g., 'solve \\( x \\) where \\( x \\) is a vector').
+   - MAINTAIN SENTENCE FLOW: Math within a sentence should remain in a standard paragraph tag using inline math to ensure a natural, cohesive flow.
+   - RESERVE BLOCK MATH: Use \\[ ... \\] only for standalone, complex equations that require their own line.
+   - GROUP LOGICAL SEQUENCES: If a sequence of math symbols and text forms a single logical line or diagram, it must be grouped into a single block math expression within one wrapper div. Never create multiple adjacent block math containers for parts of the same logical sequence.
+   - Ensure backslashes are present for all functions (e.g., \\sin, \\cos, \\log, \\sqrt, \\times).
    - Double check that delimiters are NOT missing.
 
 4. DISTINGUISH ANNOTATIONS VS. FIGURES (STRICT ENFORCEMENT):

@@ -663,7 +663,7 @@ const App: React.FC = () => {
                   onChange={(e) => setModel(e.target.value as ModelType)}
                   className="bg-transparent text-[9px] font-mono text-slate-300 uppercase tracking-widest border-none focus:ring-0 cursor-pointer hover:text-slate-500 transition-colors"
                 >
-                  <option value="gemini-3-flash-preview">Precision Mode</option>
+                  <option value="gemini-3.1-pro-preview">Precision Mode</option>
                   <option value="gemini-3.1-flash-lite-preview">Speed Mode</option>
                 </select>
                 <div className="w-1 h-1 bg-slate-200 rounded-full" />
