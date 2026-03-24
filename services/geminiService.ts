@@ -1,24 +1,14 @@
 
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
-import { GeminiPageResponse, LanguageLevel, BatchResponse, ModelType } from "../types";
+import { GeminiPageResponse, BatchResponse, ModelType } from "../types";
 
-const getSystemInstruction = (level: LanguageLevel) => {
-  let adaptationInstruction = "";
-  
-  if (level === 'faithful') {
-    adaptationInstruction = "FAITHFULNESS: Transcribe every word and symbol exactly as written. Preserve the logical flow and hierarchy.";
-  } else if (level === 'natural') {
-    adaptationInstruction = "NATURAL ADAPTATION: Convert the notes into natural, complete sentences using simple English. Ensure the flow is smooth while maintaining the original meaning and mathematical rigor.";
-  } else if (level === 'fleshed_out') {
-    adaptationInstruction = "FLESHED OUT ADAPTATION: Expand on the notes. Provide more context, explain steps more thoroughly, and complete any shorthand into full, detailed explanations. Act as a helpful tutor expanding on the lecture.";
-  }
-
+const getSystemInstruction = () => {
   return `
 You are a world-class specialist in mathematics education and web accessibility (WCAG 2.2 AA). 
 Your task is to convert scanned handwritten mathematics lecture notes into a high-fidelity, accessible HTML document.
 
 Rules:
-1. ${adaptationInstruction}
+1. FAITHFULNESS: Transcribe every word and symbol exactly as written. Preserve the logical flow and hierarchy.
 2. ACCESSIBILITY: Use semantic HTML5 elements (<article>, <section>, <h1>-<h6>, <p>, <ul>, <ol>). 
     - HEADING HIERARCHY (CRITICAL A11Y): You are FORBIDDEN from skipping heading levels. Always start with an <h1> for the main title. You MUST use <h2> for major sections and <h3> for sub-sections. NEVER use <h4>, <h5>, or <h6> unless you have explicitly used the preceding level on the exact same page. Do not use headings purely for visual sizing.
     - COLOR CONTRAST (STRICT): You are FORBIDDEN from using light gray text colors (e.g., text-slate-300, text-gray-300, text-zinc-300, text-slate-400). You are FORBIDDEN from using the "style" attribute for colors or backgrounds (e.g., style="color:..."). Use high-contrast text colors to ensure WCAG 2.2 AA compliance. 
@@ -74,7 +64,7 @@ CRITICAL: Do not include any internal monologue, reasoning, or "thinking" proces
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview', retries = 3): Promise<{text: string, tokenCount: number}> {
+async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3-flash-preview', retries = 3): Promise<{text: string, tokenCount: number}> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   for (let i = 0; i < retries; i++) {
@@ -102,7 +92,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
         model: model,
         contents: { parts },
         config: {
-          systemInstruction: getSystemInstruction(level) + "\nIMPORTANT: Return a JSON object with a 'pages' property containing an array of page results. Each page result must have 'html' and 'figures' properties.",
+          systemInstruction: getSystemInstruction() + "\nIMPORTANT: Return a JSON object with a 'pages' property containing an array of page results. Each page result must have 'html' and 'figures' properties.",
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -166,10 +156,10 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
   throw new Error("Max retries exceeded");
 }
 
-export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], level: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview'): Promise<BatchResponse> => {
+export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3-flash-preview'): Promise<BatchResponse> => {
   let result = { text: "", tokenCount: 0 };
   try {
-    result = await callBatchGeminiWithRetry(images, level, model);
+    result = await callBatchGeminiWithRetry(images, model);
     const parsed = JSON.parse(result.text);
     return { pages: parsed.pages as GeminiPageResponse[], tokenCount: result.tokenCount };
   } catch (error: any) {

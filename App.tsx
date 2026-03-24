@@ -652,7 +652,7 @@ const App: React.FC = () => {
         {!state.results.length && !state.isProcessing ? (
           <>
             <Dashboard 
-              onFileUpload={(file, level) => handleFileUpload(file, level, state.selectedModel)} 
+              onFileUpload={(file) => handleFileUpload(file, state.selectedModel)} 
               isProcessing={state.isProcessing} 
               onShowDocs={() => setShowHelp(true)}
             />
