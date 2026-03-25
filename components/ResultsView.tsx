@@ -148,7 +148,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 
           <div className="min-h-[800px] pb-32">
             {viewMode === 'preview' ? (
-              <article ref={contentRef} className="math-content prose prose-slate max-w-none bg-[#fafaf9] p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 w-full">
+              <article ref={contentRef} className="math-content max-w-none bg-[#fafaf9] p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 w-full">
                  <div dangerouslySetInnerHTML={{ __html: results[activeTab]?.html || '' }} />
               </article>
             ) : (

@@ -96,7 +96,7 @@ const App: React.FC = () => {
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;600;800&display=swap');
         
         :root {
             --bg: #fdfdfd;
@@ -317,11 +317,14 @@ const App: React.FC = () => {
             margin-bottom: 4rem; 
             position: relative; 
             width: 100%; 
-            background: white;
+            background: #fafaf9;
             padding: 1.5rem;
             display: flow-root;
             box-sizing: border-box;
             transition: padding 0.3s ease;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         @media (min-width: 1024px) {
@@ -329,17 +332,32 @@ const App: React.FC = () => {
                 padding: 3rem;
             }
             .sidebar-hidden article {
-                padding: 2rem 0;
+                box-shadow: none !important;
+                padding: 2rem 0 !important;
+                position: relative;
                 width: 100%;
+                border: none !important;
             }
         }
 
         .math-content { 
             color: var(--ink); 
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.25rem;
+            line-height: 1.6;
         }
 
         .math-content p {
             margin-bottom: 1.5rem;
+        }
+
+        .math-content ul, .math-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        .math-content li {
+            margin-bottom: 0.5rem;
         }
 
         .page-badge { 
@@ -357,7 +375,7 @@ const App: React.FC = () => {
         }
 
         .notebox { 
-            border-left: 4px solid var(--accent); 
+            border-left: 4px solid var(--accent) !important; 
             padding: 1.5rem 2rem; 
             margin: 2.5rem 0; 
             background-color: #f8fafc; 
@@ -373,7 +391,7 @@ const App: React.FC = () => {
             margin-top: 4rem;
             margin-bottom: 1.5rem;
             line-height: 1.2;
-            font-weight: 800;
+            font-weight: 900;
             letter-spacing: -0.02em;
         }
 
@@ -408,29 +426,6 @@ const App: React.FC = () => {
             overflow: hidden;
         }
 
-        @media (min-width: 1280px) {
-            .math-content {
-                display: grid;
-                grid-template-columns: 1fr 25%;
-                gap: 0 2rem;
-                align-items: start;
-            }
-            .math-content > * {
-                grid-column: 1;
-            }
-            .math-content > figure {
-                grid-column: 2;
-                grid-row: span 50;
-                margin: 0;
-                width: 100%;
-                max-width: none;
-            }
-            .math-content h1, .math-content h2, .math-content h3 {
-                grid-column: 1 / -1;
-                clear: both;
-            }
-        }
-
         figcaption {
             font-family: 'Inter', sans-serif;
             font-size: 0.875rem;
@@ -450,7 +445,6 @@ const App: React.FC = () => {
             margin: 0 auto;
         }
 
-        /* Math overflow safety */
         mjx-container {
             max-width: 100% !important;
             overflow-x: auto !important;
@@ -471,6 +465,9 @@ const App: React.FC = () => {
                 padding: 0; 
                 margin-bottom: 0; 
                 page-break-after: always; 
+                border: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
             }
             .page-badge { display: none; }
             .no-print { display: none !important; }
