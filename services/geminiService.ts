@@ -22,10 +22,8 @@ Rules:
    - LISTS: Use 'list-disc list-inside space-y-2 ml-4 mb-6' for unordered lists.
    - NOTEPADS/BOXES: For boxed annotations or important notes, use '<div class="notebox">'. Ensure these boxes use the 'notebox' class and NEVER use green backgrounds or borders.
 4. MATHEMATICS (CRITICAL): Convert all mathematical expressions into LaTeX. 
-   - PREFER INLINE MATH: Use \\( ... \\) for variables, short expressions, or any math that is part of a sentence or has nearby text labels (e.g., 'solve \\( x \\) where \\( x \\) is a vector').
-   - MAINTAIN SENTENCE FLOW: Math within a sentence should remain in a standard paragraph tag using inline math to ensure a natural, cohesive flow.
-   - RESERVE BLOCK MATH: Use \\[ ... \\] only for standalone, complex equations that require their own line.
-   - GROUP LOGICAL SEQUENCES: If a sequence of math symbols and text forms a single logical line or diagram, it must be grouped into a single block math expression within one wrapper div. Never create multiple adjacent block math containers for parts of the same logical sequence.
+   - Use \\( ... \\) for inline math.
+   - Use \\[ ... \\] for block/display math.
    - Ensure backslashes are present for all functions (e.g., \\sin, \\cos, \\log, \\sqrt, \\times).
    - Double check that delimiters are NOT missing.
 

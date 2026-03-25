@@ -1,6 +1,5 @@
 
-export type LanguageLevel = 'faithful' | 'natural' | 'fleshed_out';
-export type ModelType = 'gemini-3.1-flash-lite-preview' | 'gemini-3.1-pro-preview';
+export type ModelType = 'gemini-3-flash-preview' | 'gemini-3.1-flash-lite-preview';
 
 export interface Figure {
   id: string;
