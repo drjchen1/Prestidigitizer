@@ -47,7 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
       {/* 1. Top: Prestidigitizer Title and Branding */}
       <div className="flex items-center gap-4 md:gap-6 mb-12">
         <div className="bg-purdue text-slate-900 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-xl md:rounded-2xl shadow-xl shadow-slate-200 flex-shrink-0">
-          <span className="text-3xl md:text-4xl font-serif italic font-bold leading-none select-none translate-x-0.5">P</span>
+          <span className="text-3xl md:text-4xl font-serif italic font-bold leading-none select-none -translate-x-0.5">P</span>
         </div>
         <h1 className="text-[48px] md:text-[64px] font-black tracking-tighter leading-none flex items-center">
           <span className="text-black">Presti</span><span className="text-purdue font-bold">digitizer</span>

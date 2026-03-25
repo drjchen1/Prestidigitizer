@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppState, ConversionResult, ModelType } from '../types';
+import { AppState, ConversionResult, LanguageLevel, ModelType } from '../types';
 import { pdfToImageData } from '../services/pdfService';
 import { convertBatchToHtml } from '../services/geminiService';
 import { runAccessibilityAudit } from '../utils/accessibility';
@@ -18,7 +18,7 @@ export const useDigitization = () => {
     statusMessage: 'Waiting for upload...',
     sessionRequestCount: 0,
     dailyRequestCount: 0,
-    selectedModel: 'gemini-3-flash-preview'
+    selectedModel: 'gemini-3.1-flash-lite-preview'
   });
 
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -65,7 +65,7 @@ export const useDigitization = () => {
     });
   }, []);
 
-  const handleFileUpload = async (file: File, model: ModelType = 'gemini-3-flash-preview') => {
+  const handleFileUpload = async (file: File, languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-3.1-flash-lite-preview') => {
     if (!file) return;
 
     setOriginalFile(file);

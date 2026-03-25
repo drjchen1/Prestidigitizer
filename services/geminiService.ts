@@ -21,9 +21,12 @@ Rules:
    - MATHEMATICS: Ensure block math '\\[ ... \\]' is wrapped in a '<div class="my-8 overflow-x-auto py-4 bg-slate-50 rounded-xl px-6 border border-slate-200 shadow-sm">' to make it stand out and be readable. Use a neutral, muted stone/slate palette. NEVER use green (e.g., bg-green-50, border-green-200) for any boxes or backgrounds.
    - LISTS: Use 'list-disc list-inside space-y-2 ml-4 mb-6' for unordered lists.
    - NOTEPADS/BOXES: For boxed annotations or important notes, use '<div class="notebox">'. Ensure these boxes use the 'notebox' class and NEVER use green backgrounds or borders.
-4. MATHEMATICS (CRITICAL): Convert all mathematical expressions into LaTeX. 
-   - Use \\( ... \\) for inline math.
-   - Use \\[ ... \\] for block/display math.
+3. MATHEMATICS (CRITICAL): Convert all mathematical expressions into LaTeX. 
+   - PREFER INLINE MATH: Use \\( ... \\) for variables, short expressions, or any math that is part of a sentence or has nearby text labels (e.g., 'solve \\( x \\) where \\( x \\) is a vector').
+   - MAINTAIN SENTENCE FLOW: Math within a sentence should remain in a standard paragraph tag using inline math to ensure a natural, cohesive flow.
+   - RESERVE BLOCK MATH: Use \\[ ... \\] only for standalone, complex equations that require their own line.
+   - GROUP LOGICAL SEQUENCES: If a sequence of math symbols and text forms a single logical line or diagram, it must be grouped into a single block math expression within one wrapper div. Never create multiple adjacent block math containers for parts of the same logical sequence.
+   - ARROWS AND LABELS IN EQUATIONS: When handwritten notes use arrows to point to specific parts of an equation to label them (e.g., pointing to 'm' and labeling it 'mass'), DO NOT create separate text elements below the equation. Instead, incorporate these labels directly into the LaTeX equation using \\underbrace{...}_{\\text{label}} or \\overbrace{...}^{\\text{label}}. This ensures the label remains semantically and visually attached to the correct part of the math.
    - Ensure backslashes are present for all functions (e.g., \\sin, \\cos, \\log, \\sqrt, \\times).
    - Double check that delimiters are NOT missing.
 
@@ -64,7 +67,7 @@ CRITICAL: Do not include any internal monologue, reasoning, or "thinking" proces
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3-flash-preview', retries = 3): Promise<{text: string, tokenCount: number}> {
+async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', retries = 3): Promise<{text: string, tokenCount: number}> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   for (let i = 0; i < retries; i++) {
@@ -156,7 +159,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
   throw new Error("Max retries exceeded");
 }
 
-export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3-flash-preview'): Promise<BatchResponse> => {
+export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview'): Promise<BatchResponse> => {
   let result = { text: "", tokenCount: 0 };
   try {
     result = await callBatchGeminiWithRetry(images, model);
@@ -168,7 +171,7 @@ export const convertBatchToHtml = async (images: { base64: string, pageNumber: n
   }
 };
 
-export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3-flash-preview'): Promise<{result: string, tokenCount: number}> => {
+export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3.1-pro-preview'): Promise<{result: string, tokenCount: number}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({

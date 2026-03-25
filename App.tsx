@@ -14,7 +14,6 @@ import { ModelType } from './types';
 const App: React.FC = () => {
   const {
     state,
-    elapsedTime,
     originalFile,
     handleFileUpload,
     saveEditedFigure,
