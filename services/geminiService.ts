@@ -48,8 +48,8 @@ Rules:
    - Generate a HIGHLY CONCISE alt text description (1-2 sentences, max 125 characters).
    - NO ABRUPT CUTOFFS: Ensure the description is a complete, well-formed thought that ends naturally.
    - BEST FIT: Do not assume a fixed orientation (portrait/landscape). Focus on logical content and let the layout handle the visual flow.
-   - MATHEMATICAL PRECISION: Use LaTeX (wrapped in \\( ... \\)) for complex mathematical expressions.
-   - ACCESSIBILITY: Provide a clear, spoken-word description of the math.
+   - MATHEMATICAL PRECISION: Use LaTeX for all mathematical expressions. Use \\( ... \\) for inline math or \\[ ... \\] for standalone block math.
+   - ACCESSIBILITY: Provide a clear, spoken-word equivalent for complex mathematical notation (e.g., "x squared" for \\( x^2 \\)) to ensure accessibility for screen readers.
    - In the HTML, place an <img> tag with a matching ID: <img id="fig_ID" alt="[CONCISE DESCRIPTION]">.
    - DO NOT wrap the <img> tag in a <p> tag. You may place it inside layout <div>s (e.g., for side-by-side flex layouts). The system will automatically wrap the <img> in a styled <figure> container.
 
@@ -185,8 +185,8 @@ export const describeFigure = async (base64Image: string, model: ModelType = 'ge
           1. CONCISENESS: Limit to 1-2 sentences and ensure the total length is under 125 characters.
           2. NO ABRUPT CUTOFFS: Ensure the description is a complete, well-formed thought that ends naturally.
           3. BEST FIT: Do not assume fixed orientation; describe the logical mathematical content.
-          4. MATHEMATICAL PRECISION: Use LaTeX (wrapped in \\( ... \\)) for all mathematical expressions.
-          5. SPOKEN MATH: Immediately following any LaTeX, provide a clear spoken-word equivalent in parentheses.
+          4. MATHEMATICAL PRECISION: Use LaTeX for all mathematical expressions. Use \\( ... \\) for inline math or \\[ ... \\] for standalone block math.
+          5. SPOKEN MATH: Provide a clear spoken-word equivalent for complex mathematical notation (e.g., "x squared" for \\( x^2 \\)) to ensure accessibility for screen readers.
           
           Return ONLY the description text.` }
         ]

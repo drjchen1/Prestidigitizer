@@ -310,7 +310,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ figure, onSave, onClose, onAp
                     </div>
                   </div>
                   <p className="text-[9px] text-slate-400 leading-relaxed italic">
-                    Tip: Use <code className="bg-slate-100 px-1 rounded">\( ... \)</code> for inline math. MathJax will render it in the exported document.
+                    Tip: Use <code className="bg-slate-100 px-1 rounded">\( ... \)</code> for inline math or <code className="bg-slate-100 px-1 rounded">\[ ... \]</code> for block math. Provide spoken-word equivalents for complex notation.
                   </p>
                 </div>
               </section>
