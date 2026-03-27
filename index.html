@@ -9,7 +9,9 @@
   <!-- MathJax Config -->
   <script>
     window.MathJax = {
+      loader: {load: ['[tex]/mathtools']},
       tex: {
+        packages: {'[+]': ['mathtools']},
         inlineMath: [['\\(', '\\)']],
         displayMath: [['\\[', '\\]']],
         processEscapes: true
@@ -41,6 +43,10 @@
       font-size: 1.25rem;
       line-height: 1.6;
     }
+    .math-content .flex > *,
+    .math-content .grid > * {
+      min-width: 0;
+    }
     .math-content h1, .math-content h2, .math-content h3 {
       font-family: 'Inter', sans-serif;
     }
@@ -57,7 +63,7 @@
     .math-content figure {
       margin: 2rem 0;
       padding: 1.5rem;
-      background: #fafaf9;
+      background: #ffffff;
       border: 1px solid #f1f5f9;
       border-radius: 1rem;
       text-align: center;

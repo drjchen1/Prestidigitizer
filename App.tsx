@@ -9,7 +9,7 @@ import ResultsView from './components/ResultsView';
 import AccessibilityAuditReport from './components/AccessibilityAuditReport';
 import HelpModal from './components/HelpModal';
 import { useDigitization } from './hooks/useDigitization';
-import { ModelType } from './types';
+import { ModelType, LayoutMode } from './types';
 
 const App: React.FC = () => {
   const {
@@ -23,6 +23,7 @@ const App: React.FC = () => {
   } = useDigitization();
 
   const [viewMode, setViewMode] = useState<'preview' | 'source'>('preview');
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('paginated');
   const [activeTab, setActiveTab] = useState<number>(0);
   const [showHelp, setShowHelp] = useState(false);
   const [showAuditReport, setShowAuditReport] = useState(false);
@@ -42,6 +43,7 @@ const App: React.FC = () => {
     reset();
     setActiveTab(0);
     setViewMode('preview');
+    setLayoutMode('paginated');
     setShowAuditReport(false);
     setEditingFigure(null);
     setHasDownloaded(false);
@@ -160,7 +162,7 @@ const App: React.FC = () => {
                 margin: 0 auto;
                 display: block;
                 padding: 5rem;
-                background: #fafaf9;
+                background: #ffffff;
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                 border-radius: 1.5rem;
             }
@@ -317,7 +319,7 @@ const App: React.FC = () => {
             margin-bottom: 4rem; 
             position: relative; 
             width: 100%; 
-            background: #fafaf9;
+            background: #ffffff;
             padding: 1.5rem;
             display: flow-root;
             box-sizing: border-box;
@@ -345,6 +347,11 @@ const App: React.FC = () => {
             font-family: 'Crimson Pro', serif;
             font-size: 1.25rem;
             line-height: 1.6;
+        }
+
+        .math-content .flex > *,
+        .math-content .grid > * {
+            min-width: 0;
         }
 
         .math-content p {
@@ -415,7 +422,7 @@ const App: React.FC = () => {
         figure {
             margin: 2rem 0;
             padding: 1.5rem;
-            background: #fff;
+            background: #ffffff;
             border: 1px solid #f1f5f9;
             border-radius: 1rem;
             text-align: center;
@@ -423,7 +430,7 @@ const App: React.FC = () => {
             max-width: 100%;
             box-sizing: border-box;
             display: block;
-            overflow: hidden;
+            overflow-x: auto;
         }
 
         figcaption {
@@ -475,13 +482,16 @@ const App: React.FC = () => {
     </style>
 </head>
 <body>
+    ${layoutMode === 'paginated' ? `
     <button id="sidebar-toggle" class="no-print toggle-sidebar-btn" aria-label="Toggle navigation sidebar" aria-expanded="true" aria-controls="sidebar-nav">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
     </button>
-    <div class="container">
-        <div id="main-layout" class="layout">
+    ` : ''}
+    <div class="container ${layoutMode === 'continuous' ? 'sidebar-hidden' : ''}">
+        <div id="main-layout" class="layout ${layoutMode === 'continuous' ? 'sidebar-hidden' : ''}">
+            ${layoutMode === 'paginated' ? `
             <nav id="sidebar-nav" class="sidebar no-print" aria-label="Document navigation">
                 <div class="sidebar-title">Contents</div>
                 <ul class="sidebar-nav">
@@ -490,8 +500,15 @@ const App: React.FC = () => {
                     `).join('')}
                 </ul>
             </nav>
+            ` : ''}
             <main class="content" style="padding-bottom: 12rem;">
-                ${cleanResults.map((r, idx) => `
+                ${layoutMode === 'continuous' ? `
+                <article role="region" class="page-article content-expanded">
+                    <div class="math-content">
+                        ${cleanResults.map(r => `<span class="sr-only">Original Page ${r.pageNumber}</span>\n` + r.html).join('\n')}
+                    </div>
+                </article>
+                ` : cleanResults.map((r, idx) => `
                 <article id="page-${r.pageNumber}" role="region" class="page-article">
                     ${idx === 0 && originalFileName ? `
                     <div class="no-print download-btn-wrapper" style="position: absolute; top: 0; right: 1.5rem;">
@@ -519,26 +536,30 @@ const App: React.FC = () => {
         const sidebar = document.getElementById('sidebar-nav');
         const articles = document.querySelectorAll('.page-article');
 
-        toggleBtn.addEventListener('click', () => {
-            const isHidden = sidebar.classList.toggle('hidden');
-            layout.classList.toggle('sidebar-hidden');
-            container.classList.toggle('sidebar-hidden');
-            toggleBtn.setAttribute('aria-expanded', !isHidden);
-            
-            articles.forEach(article => {
-                if (isHidden) {
-                    article.classList.add('content-expanded');
-                } else {
-                    article.classList.remove('content-expanded');
-                }
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = sidebar.classList.toggle('hidden');
+                layout.classList.toggle('sidebar-hidden');
+                container.classList.toggle('sidebar-hidden');
+                toggleBtn.setAttribute('aria-expanded', !isHidden);
+                
+                articles.forEach(article => {
+                    if (isHidden) {
+                        article.classList.add('content-expanded');
+                    } else {
+                        article.classList.remove('content-expanded');
+                    }
+                });
             });
-        });
+        }
 
         function checkMobile() {
-            if (window.innerWidth < 1024) {
-                toggleBtn.style.display = 'none';
-            } else {
-                toggleBtn.style.display = 'flex';
+            if (toggleBtn) {
+                if (window.innerWidth < 1024) {
+                    toggleBtn.style.display = 'none';
+                } else {
+                    toggleBtn.style.display = 'flex';
+                }
             }
         }
         window.addEventListener('resize', checkMobile);
@@ -661,6 +682,7 @@ const App: React.FC = () => {
                 >
                   <option value="gemini-3-flash-preview">Flash 3</option>
                   <option value="gemini-3.1-flash-lite-preview">Flash 3.1 Lite</option>
+                  <option value="gemini-3.1-pro-preview">Pro 3.1</option>
                 </select>
                 <div className="w-1 h-1 bg-slate-200 rounded-full" />
                 <div className="text-[9px] font-mono text-slate-400 uppercase tracking-[0.3em]">
@@ -680,6 +702,8 @@ const App: React.FC = () => {
             onDownloadHtml={handleDownloadHtml}
             onShowAudit={() => setShowAuditReport(true)}
             onReset={handleReset}
+            layoutMode={layoutMode}
+            setLayoutMode={setLayoutMode}
           />
         )}
       </main>
@@ -694,28 +718,6 @@ const App: React.FC = () => {
           font-style: italic;
           color: #334155;
           box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        }
-        @media (min-width: 1400px) {
-          .math-content {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 0 4rem;
-            align-items: start;
-          }
-          .math-content > * {
-            grid-column: 1;
-          }
-          .math-content > figure {
-            grid-column: 2;
-            grid-row: span 20;
-            margin: 0;
-            width: 100%;
-            max-width: none;
-          }
-          .math-content h1, .math-content h2, .math-content h3 {
-            grid-column: 1 / -1;
-            clear: both;
-          }
         }
         @media print {
           header, aside, button, label, .border-b { display: none !important; }
