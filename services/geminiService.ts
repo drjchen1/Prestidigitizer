@@ -45,11 +45,11 @@ Rules:
 6. GRAPHS & DIAGRAMS (FIGURES ONLY):
    - Identify every actual drawing (axes, curves, sketches).
    - Determine its exact bounding box in [ymin, xmin, ymax, xmax] format (normalized 0-1000).
-   - Generate a HIGHLY CONCISE alt text description (1-2 sentences, max 125 characters).
+   - Generate a highly accessible, concise alt text description (1-2 sentences).
    - NO ABRUPT CUTOFFS: Ensure the description is a complete, well-formed thought that ends naturally.
    - BEST FIT: Do not assume a fixed orientation (portrait/landscape). Focus on logical content and let the layout handle the visual flow.
-   - MATHEMATICAL PRECISION: Use LaTeX for all mathematical expressions. Use \\( ... \\) for inline math or \\[ ... \\] for standalone block math.
-   - ACCESSIBILITY: Provide a clear, spoken-word equivalent for complex mathematical notation (e.g., "x squared" for \\( x^2 \\)) to ensure accessibility for screen readers.
+   - MATHEMATICAL PRECISION: Ensure that any LaTeX expressions are properly enclosed within \\( ... \\) for inline math or \\[ ... \\] for block math.
+   - ACCESSIBILITY: Provide a spoken-word equivalent for complex mathematical notation to ensure accessibility for screen readers.
    - In the HTML, place an <img> tag with a matching ID: <img id="fig_ID" alt="[CONCISE DESCRIPTION]">.
    - DO NOT wrap the <img> tag in a <p> tag. You may place it inside layout <div>s (e.g., for side-by-side flex layouts). The system will automatically wrap the <img> in a styled <figure> container.
 
@@ -179,14 +179,14 @@ export const describeFigure = async (base64Image: string, model: ModelType = 'ge
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/png', data: base64Image.split(',')[1] || base64Image } },
-          { text: `Generate a highly accessible, extremely concise description (1-2 sentences, max 125 characters) of this mathematical figure for a blind student.
+          { text: `Generate a highly accessible, concise description (1-2 sentences) of this mathematical figure for a blind student.
           
           RULES:
-          1. CONCISENESS: Limit to 1-2 sentences and ensure the total length is under 125 characters.
+          1. CONCISENESS: Limit to 1-2 sentences.
           2. NO ABRUPT CUTOFFS: Ensure the description is a complete, well-formed thought that ends naturally.
           3. BEST FIT: Do not assume fixed orientation; describe the logical mathematical content.
-          4. MATHEMATICAL PRECISION: Use LaTeX for all mathematical expressions. Use \\( ... \\) for inline math or \\[ ... \\] for standalone block math.
-          5. SPOKEN MATH: Provide a clear spoken-word equivalent for complex mathematical notation (e.g., "x squared" for \\( x^2 \\)) to ensure accessibility for screen readers.
+          4. MATHEMATICAL PRECISION: Ensure that any LaTeX expressions are properly enclosed within \\( ... \\) for inline math or \\[ ... \\] for block math.
+          5. SPOKEN MATH: Provide a spoken-word equivalent for complex mathematical notation to ensure accessibility for screen readers.
           
           Return ONLY the description text.` }
         ]
