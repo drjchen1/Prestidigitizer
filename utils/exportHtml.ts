@@ -96,15 +96,6 @@ export const generateHtmlDocument = (
                 position: relative;
                 width: 100%;
             }
-            .sidebar-hidden .math-content {
-                max-width: 1100px;
-                margin: 0 auto;
-                display: block;
-                padding: 5rem;
-                background: #ffffff;
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-                border-radius: 1.5rem;
-            }
             .sidebar-hidden .download-btn-wrapper {
                 position: fixed;
                 right: 3rem !important;
@@ -265,6 +256,28 @@ export const generateHtmlDocument = (
             margin-bottom: 0;
         }
 
+        .sidebar-hidden .math-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: block;
+            padding: 1.5rem;
+            background: #ffffff;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-radius: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar-hidden .math-content {
+                padding: 3rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .sidebar-hidden .math-content {
+                padding: 5rem;
+            }
+        }
+
         .page-badge {
             position: absolute;
             top: -1rem;
@@ -406,6 +419,7 @@ export const generateHtmlDocument = (
         }
         
         mjx-container[display="true"] {
+            max-width: 100% !important;
             margin: 2rem 0 !important;
             padding: 1.5rem !important;
             background: #f8fafc !important;
@@ -432,16 +446,15 @@ export const generateHtmlDocument = (
     </style>
 </head>
 <body>
-    <div class="container" id="main-container">
-        <header class="header no-print">
-            <h1 class="title">
-                ${extractedTitle}
-            </h1>
-            <div class="controls">
+    <div class="container ${layoutMode === 'continuous' ? 'sidebar-hidden' : ''}" id="main-container">
+        <header class="header no-print" style="border-bottom: none; margin-bottom: 1rem; padding-bottom: 0;">
+            <div class="controls" style="width: 100%; justify-content: flex-end;">
+                ${layoutMode === 'paginated' ? `
                 <button id="sidebar-toggle" class="btn btn-outline" aria-expanded="true" aria-controls="sidebar-nav">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     Toggle Sidebar
                 </button>
+                ` : ''}
                 <button onclick="window.print()" class="btn btn-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                     Print PDF
@@ -449,7 +462,7 @@ export const generateHtmlDocument = (
             </div>
         </header>
 
-        <div class="layout" id="main-layout">
+        <div class="layout ${layoutMode === 'continuous' ? 'sidebar-hidden' : ''}" id="main-layout">
             ${layoutMode === 'paginated' ? `
             <nav class="sidebar no-print" id="sidebar-nav" aria-label="Page navigation">
                 <h2 style="font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-top: 0; margin-bottom: 1rem;">Contents</h2>

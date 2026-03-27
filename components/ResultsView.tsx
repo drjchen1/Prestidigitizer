@@ -170,7 +170,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
             {viewMode === 'preview' ? (
               <article ref={contentRef} className="math-content max-w-none bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 w-full">
                  {layoutMode === 'continuous' ? (
-                   <div className="space-y-0">
+                   <div className="space-y-0 max-w-[1100px] mx-auto">
                      {results.map((r, i) => (
                        <div key={i} className="relative">
                          <span className="sr-only">Original Page {r.pageNumber}</span>
@@ -179,7 +179,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                      ))}
                    </div>
                  ) : (
-                   <div dangerouslySetInnerHTML={{ __html: results[activeTab]?.html || '' }} />
+                   <div className="max-w-[1100px] mx-auto" dangerouslySetInnerHTML={{ __html: results[activeTab]?.html || '' }} />
                  )}
               </article>
             ) : (

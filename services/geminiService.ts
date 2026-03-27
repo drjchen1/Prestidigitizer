@@ -9,7 +9,7 @@ Your task is to convert scanned handwritten mathematics lecture notes into a hig
 
 Rules:
 1. FAITHFULNESS & LAYOUT: Transcribe every word and symbol exactly as written. Preserve the logical flow, hierarchy, and spatial relationships of the original notes.
-    - If text and a figure appear side-by-side in the notes, use Tailwind flexbox or grid classes (e.g., <div class="flex flex-col md:flex-row gap-6 items-start">) to replicate this layout.
+    - If text and a figure appear side-by-side in the notes, use Tailwind grid classes (e.g., <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">) to replicate this layout. This ensures the text and figure share the space equally and prevents the text from being squished. DO NOT use flexbox without flex-1 on the text.
 
 2. ACCESSIBILITY: Use semantic HTML5 elements (<article>, <section>, <h1>-<h6>, <p>, <ul>, <ol>, <dl>). 
     - HEADING HIERARCHY (CRITICAL A11Y): You are FORBIDDEN from skipping heading levels. Always start with an <h1> for the main title. You MUST use <h2> for major sections and <h3> for sub-sections. NEVER use <h4>, <h5>, or <h6> unless you have explicitly used the preceding level on the exact same page. Do not use headings purely for visual sizing.
@@ -25,7 +25,7 @@ Rules:
 
 4. MATHEMATICS (CRITICAL): Convert all mathematical expressions into LaTeX. 
    - PREFER INLINE MATH: Use \\( ... \\) for variables, short expressions, or any math that is part of a sentence to maintain a natural, cohesive flow.
-   - BLOCK MATH: Ensure block math '\\[ ... \\]' is wrapped in a '<div class="my-8 overflow-x-auto py-4 bg-slate-50 rounded-xl px-6 border border-slate-200 shadow-sm">' to make it stand out and be readable. Use a neutral, muted stone/slate palette. NEVER use green (e.g., bg-green-50, border-green-200) for any boxes or backgrounds.
+   - BLOCK MATH: Use '\\[ ... \\]' for standalone block math. DO NOT wrap block math in any additional <div> or styling classes. The system will automatically style block math.
    - ARROWS AND LABELS IN EQUATIONS: When handwritten notes use arrows to point to parts of an equation, DO NOT use \\underbrace or \\overbrace for long text labels. This breaks the math spacing. Instead, keep the mathematical expression intact so it sticks together. Place the labels using a structured definition list (<dl class="mt-4 space-y-2 text-sm text-slate-700">) or bulleted list immediately below the equation to define the variables (e.g., "Where: \\( e^{\\lambda t} \\) is the eigenvalue").
    - Ensure backslashes are present for all functions (e.g., \\sin, \\cos, \\log, \\sqrt, \\times).
    - Double check that delimiters are NOT missing.
@@ -51,7 +51,7 @@ Rules:
    - MATHEMATICAL PRECISION: Ensure that any LaTeX expressions are properly enclosed within \\( ... \\) for inline math or \\[ ... \\] for block math.
    - ACCESSIBILITY: Provide a spoken-word equivalent for complex mathematical notation to ensure accessibility for screen readers.
    - In the HTML, place an <img> tag with a matching ID: <img id="fig_ID" alt="[CONCISE DESCRIPTION]">.
-   - DO NOT wrap the <img> tag in a <p> tag. You may place it inside layout <div>s (e.g., for side-by-side flex layouts). The system will automatically wrap the <img> in a styled <figure> container.
+   - DO NOT wrap the <img> tag in a <p> tag. You may place it inside layout <div>s (e.g., for side-by-side grid layouts). The system will automatically wrap the <img> in a styled <figure> container.
 
 7. OUTPUT FORMAT: Return ONLY a JSON object:
    {
