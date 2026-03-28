@@ -251,6 +251,7 @@ export const useDigitization = () => {
     setState(prev => ({
       ...prev,
       isProcessing: true,
+      progress: 0,
       statusMessage: `Reprocessing Page ${pageIndex + 1} with Pro model...`
     }));
 
@@ -259,11 +260,17 @@ export const useDigitization = () => {
       const pageData = await pdfToImageData(originalFile, true, [pageIndex + 1]);
       if (!pageData || pageData.length === 0) throw new Error("Could not extract page data");
 
+      setState(prev => ({ ...prev, progress: 20 }));
+
       const optimized = await optimizeImageForGemini(pageData[0].base64);
       const batchImages = [{ base64: optimized, pageNumber: pageIndex + 1 }];
 
+      setState(prev => ({ ...prev, progress: 40 }));
+
       const batchResponses = await convertBatchToHtml(batchImages, model);
       incrementUsage();
+
+      setState(prev => ({ ...prev, progress: 80 }));
 
       const geminiResponse = batchResponses.pages[0];
       if (!geminiResponse) throw new Error("No response from AI");
@@ -325,6 +332,7 @@ export const useDigitization = () => {
         return {
           ...prev,
           isProcessing: false,
+          progress: 100,
           statusMessage: 'Reprocessing Complete!',
           results: newResults
         };

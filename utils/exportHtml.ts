@@ -452,6 +452,12 @@ export const generateHtmlDocument = (
             overflow-y: hidden !important;
         }
 
+        /* Fix alignment for math in flex containers */
+        .math-content .flex mjx-container[display="true"] {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
         /* Safety net: prevent double-boxing if math is nested in a notebox */
         .notebox mjx-container[display="true"] {
             border-left: none !important;
