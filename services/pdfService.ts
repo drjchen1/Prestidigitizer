@@ -12,7 +12,7 @@ export interface PdfImageData {
   orientation: 'portrait' | 'landscape';
 }
 
-export const pdfToImageData = async (file: File, optimize: boolean = false): Promise<PdfImageData[]> => {
+export const pdfToImageData = async (file: File, optimize: boolean = false, targetPageIndices?: number[]): Promise<PdfImageData[]> => {
   const fileType = file.type;
   const fileName = file.name.toLowerCase();
 
@@ -24,7 +24,7 @@ export const pdfToImageData = async (file: File, optimize: boolean = false): Pro
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     
-    const pageIndices = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+    const pageIndices = targetPageIndices || Array.from({ length: pdf.numPages }, (_, i) => i + 1);
     
     const data = await Promise.all(pageIndices.map(async (i) => {
       const page = await pdf.getPage(i);

@@ -1,7 +1,7 @@
-import { GeminiPageResponse, LayoutMode } from '../types';
+import { ConversionResult, LayoutMode } from '../types';
 
 export const generateHtmlDocument = (
-  results: GeminiPageResponse[],
+  results: ConversionResult[],
   originalFileName: string,
   layoutMode: LayoutMode
 ): string => {
@@ -10,6 +10,9 @@ export const generateHtmlDocument = (
   const doc = parser.parseFromString(firstPageHtml, 'text/html');
   const firstHeading = doc.querySelector('h1, h2, h3');
   const extractedTitle = firstHeading ? firstHeading.textContent?.trim() : 'Mathematics Course Notes';
+  
+  const isLandscape = results.length > 0 && results[0].width > results[0].height;
+  const containerMaxWidth = isLandscape ? "1200px" : "896px";
 
   const cleanResults = results.map(r => {
     const parser = new DOMParser();
@@ -37,11 +40,11 @@ export const generateHtmlDocument = (
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;600;800&display=swap');
         
         :root {
-            --bg: #fdfdfd;
-            --ink: #1e293b;
+            --bg: #FDFBF7;
+            --ink: #1E293B;
             --heading-color: #0f172a;
             --accent: #CEB888;
             --link-color: #B19B69;
@@ -55,6 +58,29 @@ export const generateHtmlDocument = (
             padding: 0; 
             line-height: 1.7;
             font-size: 1.125rem;
+        }
+
+        *:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent);
+            color: #000;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.2s;
+            font-family: 'Inter', sans-serif;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .skip-link:focus {
+            top: 0;
         }
 
         .container {
@@ -257,7 +283,7 @@ export const generateHtmlDocument = (
         }
 
         .sidebar-hidden .math-content {
-            max-width: 1100px;
+            max-width: ${containerMaxWidth};
             margin: 0 auto;
             display: block;
             padding: 1.5rem;
@@ -421,13 +447,18 @@ export const generateHtmlDocument = (
         mjx-container[display="true"] {
             max-width: 100% !important;
             margin: 2rem 0 !important;
-            padding: 1.5rem !important;
-            background: #f8fafc !important;
-            border-radius: 0.75rem !important;
-            border: 1px solid #e2e8f0 !important;
+            border: none !important;
             overflow-x: auto !important;
             overflow-y: hidden !important;
-            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+        }
+
+        /* Safety net: prevent double-boxing if math is nested in a notebox */
+        .notebox mjx-container[display="true"] {
+            border-left: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 1rem 0 !important;
         }
 
         @media print {
@@ -446,6 +477,7 @@ export const generateHtmlDocument = (
     </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="container ${layoutMode === 'continuous' ? 'sidebar-hidden' : ''}" id="main-container">
         <header class="header no-print" style="border-bottom: none; margin-bottom: 1rem; padding-bottom: 0;">
             <div class="controls" style="width: 100%; justify-content: flex-end;">
@@ -478,11 +510,24 @@ export const generateHtmlDocument = (
                 </ul>
             </nav>
             ` : ''}
-            <main class="content" style="padding-bottom: 12rem;">
+            <main id="main-content" class="content" style="padding-bottom: 12rem;">
                 ${layoutMode === 'continuous' ? `
                 <article role="region" class="page-article content-expanded">
                     <div class="math-content">
-                        ${cleanResults.map(r => `<span class="sr-only">Original Page ${r.pageNumber}</span>\n` + r.html).join('\n')}
+                        ${cleanResults.map((r, i) => `
+                        ${i > 0 ? `
+                        <div style="display: flex; align-items: center; justify-content: center; margin: 4rem 0; position: relative;">
+                            <div style="position: absolute; inset: 0; display: flex; align-items: center;" aria-hidden="true">
+                                <div style="width: 100%; border-top: 1px dashed #cbd5e1;"></div>
+                            </div>
+                            <div style="position: relative; display: flex; justify-content: center;">
+                                <span style="background: #ffffff; padding: 0 1rem; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Page ${r.pageNumber}</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <span class="sr-only">Original Page ${r.pageNumber}</span>
+                        ${r.html}
+                        `).join('\n')}
                     </div>
                 </article>
                 ` : cleanResults.map((r, idx) => `

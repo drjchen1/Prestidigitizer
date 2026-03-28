@@ -139,14 +139,15 @@ export const useDigitization = () => {
                 id: fig.id,
                 originalSrc: screenshotBase64,
                 currentSrc: screenshotBase64,
-                alt: fig.alt
+                alt: fig.alt,
+                caption: fig.caption || "Figure"
               };
             });
             
             figureResults.forEach(figResult => {
               const imgTagRegex = new RegExp(`(?:<p[^>]*>\\s*)?<img[^>]*id=["']${figResult.id}["'][^>]*>(?:\\s*</p>)?`, 'g');
               const cleanAlt = cleanAltText(figResult.alt);
-              const displayAlt = figResult.alt;
+              const displayCaption = figResult.caption || "Figure";
 
               const figureHtml = `
                 <figure class="my-8 relative overflow-x-auto rounded-2xl shadow-sm border border-slate-200 bg-white flex flex-col items-center group/fig min-w-0 box-border max-w-full" role="group" aria-label="Visual figure: ${cleanAlt}">
@@ -155,7 +156,7 @@ export const useDigitization = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                   </button>
                   <figcaption class="p-4 w-full bg-slate-50 border-t border-slate-100 text-sm text-slate-700 font-sans text-center italic leading-relaxed" aria-hidden="true">
-                    Figure: ${displayAlt}
+                    Figure: ${displayCaption}
                   </figcaption>
                 </figure>
               `;
@@ -244,10 +245,106 @@ export const useDigitization = () => {
     }
   };
 
-  const saveEditedFigure = (update: { figureId: string, pageIndex: number, newSrc: string, newAlt?: string }) => {
+  const reprocessPage = async (pageIndex: number, model: ModelType = 'gemini-3.1-pro-preview') => {
+    if (!originalFile) return;
+
+    setState(prev => ({
+      ...prev,
+      isProcessing: true,
+      statusMessage: `Reprocessing Page ${pageIndex + 1} with Pro model...`
+    }));
+
+    try {
+      // Extract just the one page we need
+      const pageData = await pdfToImageData(originalFile, true, [pageIndex + 1]);
+      if (!pageData || pageData.length === 0) throw new Error("Could not extract page data");
+
+      const optimized = await optimizeImageForGemini(pageData[0].base64);
+      const batchImages = [{ base64: optimized, pageNumber: pageIndex + 1 }];
+
+      const batchResponses = await convertBatchToHtml(batchImages, model);
+      incrementUsage();
+
+      const geminiResponse = batchResponses.pages[0];
+      if (!geminiResponse) throw new Error("No response from AI");
+
+      let finalHtml = geminiResponse.html;
+      
+      const figureResults = geminiResponse.figures.map((fig) => {
+        const screenshotBase64 = cropImage(pageData[0].canvas, fig);
+        return {
+          id: fig.id,
+          originalSrc: screenshotBase64,
+          currentSrc: screenshotBase64,
+          alt: fig.alt,
+          caption: fig.caption || "Figure"
+        };
+      });
+      
+      figureResults.forEach(figResult => {
+        const imgTagRegex = new RegExp(`(?:<p[^>]*>\\s*)?<img[^>]*id=["']${figResult.id}["'][^>]*>(?:\\s*</p>)?`, 'g');
+        const cleanAlt = cleanAltText(figResult.alt);
+        const displayCaption = figResult.caption || "Figure";
+
+        const figureHtml = `
+          <figure class="my-8 relative overflow-x-auto rounded-2xl shadow-sm border border-slate-200 bg-white flex flex-col items-center group/fig min-w-0 box-border max-w-full" role="group" aria-label="Visual figure: ${cleanAlt}">
+            <img src="${figResult.currentSrc}" alt="${cleanAlt}" class="max-w-full h-auto" data-figure-id="${figResult.id}">
+            <button class="edit-figure-btn absolute top-2 right-2 p-2 bg-white/90 backdrop-blur shadow-lg rounded-lg opacity-0 group-hover/fig:opacity-100 transition-all hover:bg-purdue hover:text-black" data-figure-id="${figResult.id}" title="Edit Figure">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            </button>
+            <figcaption class="p-4 w-full bg-slate-50 border-t border-slate-100 text-sm text-slate-700 font-sans text-center italic leading-relaxed" aria-hidden="true">
+              Figure: ${displayCaption}
+            </figcaption>
+          </figure>
+        `;
+        finalHtml = finalHtml.replace(imgTagRegex, figureHtml);
+      });
+
+      const audit = runAccessibilityAudit(finalHtml);
+
+      setState(prev => {
+        const newResults = [...prev.results];
+        const existingIndex = newResults.findIndex(r => r.pageNumber === pageIndex + 1);
+        
+        const newPageResult = { 
+          html: finalHtml, 
+          pageNumber: pageIndex + 1,
+          width: pageData[0].width,
+          height: pageData[0].height,
+          audit,
+          figures: figureResults
+        };
+
+        if (existingIndex >= 0) {
+          newResults[existingIndex] = newPageResult;
+        } else {
+          newResults.push(newPageResult);
+          newResults.sort((a, b) => a.pageNumber - b.pageNumber);
+        }
+
+        return {
+          ...prev,
+          isProcessing: false,
+          statusMessage: 'Reprocessing Complete!',
+          results: newResults
+        };
+      });
+
+    } catch (err: any) {
+      console.error("Error reprocessing page:", err);
+      setState(prev => ({
+        ...prev,
+        isProcessing: false,
+        statusMessage: 'Error reprocessing page',
+        error: `Failed to reprocess page ${pageIndex + 1}.|Please try again.`
+      }));
+    }
+  };
+
+  const saveEditedFigure = (update: { figureId: string, pageIndex: number, newSrc: string, newAlt?: string, newCaption?: string }) => {
     setState(prev => {
       const newResults = [...prev.results];
-      const { figureId, pageIndex, newSrc, newAlt } = update;
+      const { figureId, pageIndex, newSrc, newAlt, newCaption } = update;
       
       const page = { ...newResults[pageIndex] };
       const figureIndex = page.figures.findIndex(f => f.id === figureId);
@@ -256,6 +353,7 @@ export const useDigitization = () => {
         const newFigures = [...page.figures];
         const updatedFig = { ...newFigures[figureIndex], currentSrc: newSrc };
         if (newAlt !== undefined) updatedFig.alt = newAlt;
+        if (newCaption !== undefined) updatedFig.caption = newCaption;
         newFigures[figureIndex] = updatedFig;
         page.figures = newFigures;
         
@@ -275,7 +373,7 @@ export const useDigitization = () => {
             figcaption = doc.createElement('figcaption');
             figure.appendChild(figcaption);
           }
-          figcaption.innerHTML = `Figure: ${newAlt || updatedFig.alt}`;
+          figcaption.innerHTML = `Figure: ${newCaption || updatedFig.caption || "Figure"}`;
           
           page.html = doc.body.innerHTML;
         }
@@ -310,6 +408,7 @@ export const useDigitization = () => {
     elapsedTime,
     originalFile,
     handleFileUpload,
+    reprocessPage,
     saveEditedFigure,
     incrementUsage,
     setModel,

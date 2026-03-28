@@ -19,6 +19,7 @@ const App: React.FC = () => {
     state,
     originalFile,
     handleFileUpload,
+    reprocessPage,
     saveEditedFigure,
     incrementUsage,
     setModel,
@@ -32,7 +33,7 @@ const App: React.FC = () => {
   const [showAuditReport, setShowAuditReport] = useState(false);
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const [showResetWarning, setShowResetWarning] = useState(false);
-  const [editingFigure, setEditingFigure] = useState<{ id: string, src: string, originalSrc: string, alt: string, pageIndex: number } | null>(null);
+  const [editingFigure, setEditingFigure] = useState<{ id: string, src: string, originalSrc: string, alt: string, caption: string, pageIndex: number } | null>(null);
 
   const handleReset = () => {
     if (state.results.length > 0 && !hasDownloaded) {
@@ -62,7 +63,8 @@ const App: React.FC = () => {
         pageIndex, 
         src: figure.currentSrc,
         originalSrc: figure.originalSrc,
-        alt: figure.alt
+        alt: figure.alt,
+        caption: figure.caption
       });
     }
   };
@@ -137,7 +139,7 @@ const App: React.FC = () => {
         {!state.results.length && !state.isProcessing ? (
           <>
             <Dashboard 
-              onFileUpload={(file) => handleFileUpload(file, state.selectedModel)} 
+              onFileUpload={(file) => handleFileUpload(file, 'faithful', state.selectedModel)} 
               isProcessing={state.isProcessing} 
               onShowDocs={() => setShowHelp(true)}
             />
@@ -159,21 +161,13 @@ const App: React.FC = () => {
             onReset={handleReset}
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
+            onReprocessPage={reprocessPage}
+            isProcessing={state.isProcessing}
           />
         )}
       </main>
 
       <style>{`
-        .notebox {
-          border-left: 4px solid #CEB888;
-          padding: 1.5rem 2rem;
-          margin: 2.5rem 0;
-          background-color: #f8fafc;
-          border-radius: 0 0.75rem 0.75rem 0;
-          font-style: italic;
-          color: #334155;
-          box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        }
         @media print {
           header, aside, button, label, .border-b { display: none !important; }
           main, .flex-1, .w-full { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; margin: 0 !important; padding: 0 !important; }

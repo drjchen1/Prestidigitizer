@@ -8,8 +8,9 @@ You are a world-class specialist in mathematics education and web accessibility 
 Your task is to convert scanned handwritten mathematics lecture notes into a high-fidelity, accessible HTML document.
 
 Rules:
-1. FAITHFULNESS & LAYOUT: Transcribe every word and symbol exactly as written. Preserve the logical flow, hierarchy, and spatial relationships of the original notes.
-    - If text and a figure appear side-by-side in the notes, use Tailwind grid classes (e.g., <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">) to replicate this layout. This ensures the text and figure share the space equally and prevents the text from being squished. DO NOT use flexbox without flex-1 on the text.
+1. FAITHFULNESS & SPATIAL PRESERVATION: Transcribe every word and symbol exactly as written. Preserve the logical flow, hierarchy, and spatial relationships of the original notes.
+    - If text and a figure appear side-by-side in the notes, use Tailwind grid classes (e.g., <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">) to replicate this layout.
+    - If an equation and an annotation (text with an arrow) appear side-by-side, you MUST preserve this spatial relationship. Use a flexbox container (e.g., <div class="flex items-center gap-4">) to place the equation and the text side-by-side, exactly as they appear in the notes. Do not force them onto separate lines if they are written next to each other.
 
 2. ACCESSIBILITY: Use semantic HTML5 elements (<article>, <section>, <h1>-<h6>, <p>, <ul>, <ol>, <dl>). 
     - HEADING HIERARCHY (CRITICAL A11Y): You are FORBIDDEN from skipping heading levels. Always start with an <h1> for the main title. You MUST use <h2> for major sections and <h3> for sub-sections. NEVER use <h4>, <h5>, or <h6> unless you have explicitly used the preceding level on the exact same page. Do not use headings purely for visual sizing.
@@ -19,14 +20,18 @@ Rules:
 3. UNIVERSAL DESIGN & AESTHETICS (BEAUTIFUL & ACCESSIBLE):
    - TYPOGRAPHY: Use 'font-sans' for a clean, readable look. For headings, use 'font-black tracking-tight text-slate-900'.
    - SPACING: Use standard Tailwind spacing (e.g., 'space-y-4', 'mb-6', 'mt-8') to group related concepts logically, matching the visual flow of the handwritten page.
-   - VISUAL HIERARCHY: Use 'border-l-4 border-purdue pl-6 my-8 italic text-slate-700' for important theorems or definitions.
+   - VISUAL HIERARCHY: Use 'italic text-slate-700 my-8' for important theorems or definitions. Do NOT use any left borders or gold colors here; reserve the gold bar exclusively for the '<div class="notebox">' used for explicitly boxed notes.
    - LISTS: Use 'list-disc list-outside ml-6 space-y-2 mb-6' for unordered lists to ensure proper text wrapping and readability.
    - NOTEPADS/BOXES: For boxed annotations or important notes, use '<div class="notebox">'. NEVER use green backgrounds or borders.
-
 4. MATHEMATICS (CRITICAL): Convert all mathematical expressions into LaTeX. 
    - PREFER INLINE MATH: Use \\( ... \\) for variables, short expressions, or any math that is part of a sentence to maintain a natural, cohesive flow.
-   - BLOCK MATH: Use '\\[ ... \\]' for standalone block math. DO NOT wrap block math in any additional <div> or styling classes. The system will automatically style block math.
-   - ARROWS AND LABELS IN EQUATIONS: When handwritten notes use arrows to point to parts of an equation, DO NOT use \\underbrace or \\overbrace for long text labels. This breaks the math spacing. Instead, keep the mathematical expression intact so it sticks together. Place the labels using a structured definition list (<dl class="mt-4 space-y-2 text-sm text-slate-700">) or bulleted list immediately below the equation to define the variables (e.g., "Where: \\( e^{\\lambda t} \\) is the eigenvalue").
+   - BLOCK MATH: Use '\\[ ... \\]' for standalone block math. 
+     - If the equation is NOT boxed in the handwritten notes, do not wrap it in any HTML tags. 
+     - If the equation IS explicitly boxed or highlighted as a key result in the notes, wrap it in '<div class="notebox">'.
+   - UNDERBRACES AND OVERBRACES: If the handwritten notes explicitly use curly brackets under or over math expressions, you MUST use \\underbrace{...}_{\\text{...}} or \\overbrace{...}^{\\text{...}} in LaTeX to replicate them.
+   - ARROWS AND LABELS IN EQUATIONS: When handwritten notes use arrows to point to parts of an equation, DO NOT use \\underbrace or \\overbrace to fake it. Instead:
+     - If the annotation is written to the side of the equation, preserve the spatial layout using HTML flexbox (e.g., <div class="flex items-center gap-4"><div>\\[ math \\]</div><div class="text-sm text-slate-600">\\(\\leftarrow\\) your text</div></div>).
+     - If the arrow points to a SPECIFIC TERM from above or below, and you cannot easily place it side-by-side, explain it clearly immediately below the equation using text (e.g., "Where \\(-py\\) is the reduction to growth rate"). DO NOT just put a stray \\leftarrow on a new line.
    - Ensure backslashes are present for all functions (e.g., \\sin, \\cos, \\log, \\sqrt, \\times).
    - Double check that delimiters are NOT missing.
 
@@ -34,7 +39,7 @@ Rules:
    - ANNOTATIONS (NOT FIGURES): Hand-drawn circles around text, arrows pointing to variables, large curly brackets used for grouping, and labels in boxes (e.g., "Option 2", "Important!") are NOT FIGURES.
      - Transcribe the text/math inside or pointed to by these markers as standard HTML. 
      - Use <div class="notebox"> for boxed items.
-     - Use standard text flow for bracketed groups.
+     - If curly brackets are used UNDER or OVER math expressions, use \\underbrace or \\overbrace in LaTeX. For other bracketed groups, use standard text flow.
      - IGNORE the visual circle/arrow itself if it serves only to highlight text; focus on the text content.
    - ACTUAL FIGURES: Only capture visual representations as figures if they represent:
      - Coordinate systems/graphs with axes and curves.
@@ -46,8 +51,8 @@ Rules:
    - Identify every actual drawing (axes, curves, sketches).
    - Determine its exact bounding box in [ymin, xmin, ymax, xmax] format (normalized 0-1000).
    - Generate a highly accessible, concise alt text description (1-2 sentences).
+   - Generate a short 3-5 word title for the visible caption.
    - NO ABRUPT CUTOFFS: Ensure the description is a complete, well-formed thought that ends naturally.
-   - BEST FIT: Do not assume a fixed orientation (portrait/landscape). Focus on logical content and let the layout handle the visual flow.
    - MATHEMATICAL PRECISION: Ensure that any LaTeX expressions are properly enclosed within \\( ... \\) for inline math or \\[ ... \\] for block math.
    - ACCESSIBILITY: Provide a spoken-word equivalent for complex mathematical notation to ensure accessibility for screen readers.
    - In the HTML, place an <img> tag with a matching ID: <img id="fig_ID" alt="[CONCISE DESCRIPTION]">.
@@ -57,7 +62,7 @@ Rules:
    {
      "html": "The full semantic HTML string",
      "figures": [
-       { "id": "fig_1", "box_2d": [ymin, xmin, ymax, xmax], "alt": "Detailed visual description" }
+       { "id": "fig_1", "box_2d": [ymin, xmin, ymax, xmax], "alt": "Detailed visual description", "caption": "Short title" }
      ]
    }
 
@@ -118,9 +123,10 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
                             minItems: 4,
                             maxItems: 4
                           },
-                          alt: { type: Type.STRING }
+                          alt: { type: Type.STRING },
+                          caption: { type: Type.STRING }
                         },
-                        required: ["id", "box_2d", "alt"]
+                        required: ["id", "box_2d", "alt", "caption"]
                       }
                     }
                   },
@@ -171,33 +177,47 @@ export const convertBatchToHtml = async (images: { base64: string, pageNumber: n
   }
 };
 
-export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3.1-pro-preview'): Promise<{result: string, tokenCount: number}> => {
+export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3-flash-preview'): Promise<{alt: string, caption: string, tokenCount: number}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: model,
+      model: 'gemini-3-flash-preview', // Hardcoded to flash for cost savings
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/png', data: base64Image.split(',')[1] || base64Image } },
-          { text: `Generate a highly accessible, concise description (1-2 sentences) of this mathematical figure for a blind student.
+          { text: `Generate a highly accessible, concise description (1-2 sentences) of this mathematical figure for a blind student, AND a short 3-5 word caption for sighted users.
           
           RULES:
-          1. CONCISENESS: Limit to 1-2 sentences.
+          1. CONCISENESS: Limit alt text to 1-2 sentences. Limit caption to 3-5 words.
           2. NO ABRUPT CUTOFFS: Ensure the description is a complete, well-formed thought that ends naturally.
           3. BEST FIT: Do not assume fixed orientation; describe the logical mathematical content.
           4. MATHEMATICAL PRECISION: Ensure that any LaTeX expressions are properly enclosed within \\( ... \\) for inline math or \\[ ... \\] for block math.
           5. SPOKEN MATH: Provide a spoken-word equivalent for complex mathematical notation to ensure accessibility for screen readers.
           
-          Return ONLY the description text.` }
+          Return ONLY a JSON object with 'alt' and 'caption' string properties.` }
         ]
       },
       config: {
         temperature: 0.2,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            alt: { type: Type.STRING },
+            caption: { type: Type.STRING }
+          },
+          required: ["alt", "caption"]
+        },
         thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
       }
     });
 
-    return { result: response.text?.trim() || "", tokenCount: response.usageMetadata?.totalTokenCount || 0 };
+    const parsed = JSON.parse(response.text?.trim() || "{}");
+    return { 
+      alt: parsed.alt || "", 
+      caption: parsed.caption || "", 
+      tokenCount: response.usageMetadata?.totalTokenCount || 0 
+    };
   } catch (error: any) {
     console.error('Description error:', error);
     throw error;

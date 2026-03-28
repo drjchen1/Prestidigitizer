@@ -14,6 +14,8 @@ interface ResultsViewProps {
   onDownloadHtml: () => void;
   onShowAudit: () => void;
   onReset: () => void;
+  onReprocessPage: (pageIndex: number) => void;
+  isProcessing: boolean;
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({
@@ -27,7 +29,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   onEditFigure,
   onDownloadHtml,
   onShowAudit,
-  onReset
+  onReset,
+  onReprocessPage,
+  isProcessing
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const activeAudit = results[activeTab]?.audit;
@@ -60,8 +64,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({
     }
   }, [results, activeTab, viewMode, layoutMode, onEditFigure]);
 
+  // Determine if the current document is landscape
+  const isLandscape = results.length > 0 && results[0].width > results[0].height;
+  const containerMaxWidthClass = isLandscape ? "max-w-6xl" : "max-w-4xl";
+
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-start">
+    <div className="flex flex-col-reverse lg:flex-row gap-8 items-start">
       <aside className="w-full lg:w-64 flex-shrink-0 space-y-4 lg:sticky lg:top-24">
         {layoutMode === 'paginated' && (
           <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
@@ -149,7 +157,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 
       <div className="flex-1 w-full flex flex-col">
         <div className="w-full max-w-none">
-          <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+          <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4 sticky top-20 z-30 bg-white/90 backdrop-blur-md pt-4">
              <div className="flex gap-6 items-center">
                 <div className="flex gap-4">
                   <button onClick={() => setViewMode('preview')} className={`text-[11px] font-black tracking-widest ${viewMode === 'preview' ? 'text-purdue' : 'text-slate-300 hover:text-slate-500'}`}>PREVIEW</button>
@@ -162,26 +170,60 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                 </div>
              </div>
              {layoutMode === 'paginated' && (
-               <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Page {activeTab + 1} of {results.length}</div>
+               <div className="flex items-center gap-4">
+                 <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Page {activeTab + 1} of {results.length}</div>
+                 <button 
+                   onClick={() => onReprocessPage(results[activeTab].pageNumber - 1)}
+                   disabled={isProcessing}
+                   className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-900 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-amber-200 transition-colors disabled:opacity-50"
+                   title="If the layout is broken, try reprocessing this page with the Pro model"
+                 >
+                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                   Reprocess with Pro
+                 </button>
+               </div>
              )}
           </div>
 
           <div className="min-h-[800px] pb-32">
             {viewMode === 'preview' ? (
-              <article ref={contentRef} className="math-content max-w-none bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 w-full">
+              <div ref={contentRef} className="bg-[#FDFBF7] p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 w-full">
                  {layoutMode === 'continuous' ? (
-                   <div className="space-y-0 max-w-[1100px] mx-auto">
+                   <div className={`space-y-0 ${containerMaxWidthClass} mx-auto`}>
                      {results.map((r, i) => (
                        <div key={i} className="relative">
+                         {i > 0 && (
+                           <div className="flex items-center justify-center my-16 relative">
+                             <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                               <div className="w-full border-t border-dashed border-slate-300"></div>
+                             </div>
+                             <div className="relative flex justify-center items-center gap-3">
+                               <span className="bg-[#FDFBF7] px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Page {r.pageNumber}</span>
+                               <button 
+                                 onClick={() => onReprocessPage(r.pageNumber - 1)}
+                                 disabled={isProcessing}
+                                 className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded text-[9px] font-bold uppercase tracking-widest hover:bg-amber-100 transition-colors disabled:opacity-50"
+                                 title="Reprocess this page with the Pro model"
+                               >
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                                 Pro
+                               </button>
+                             </div>
+                           </div>
+                         )}
                          <span className="sr-only">Original Page {r.pageNumber}</span>
-                         <div dangerouslySetInnerHTML={{ __html: r.html.replace(/data-figure-id="([^"]+)"/g, `data-figure-id="$1" data-page-index="${i}"`) }} />
+                         <article className="math-content bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100">
+                           <div dangerouslySetInnerHTML={{ __html: r.html.replace(/data-figure-id="([^"]+)"/g, `data-figure-id="$1" data-page-index="${i}"`) }} />
+                         </article>
                        </div>
                      ))}
                    </div>
                  ) : (
-                   <div className="max-w-[1100px] mx-auto" dangerouslySetInnerHTML={{ __html: results[activeTab]?.html || '' }} />
+                   <article className={`math-content bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100 mx-auto ${containerMaxWidthClass}`}>
+                     <div dangerouslySetInnerHTML={{ __html: results[activeTab]?.html || '' }} />
+                   </article>
                  )}
-              </article>
+              </div>
             ) : (
               <div className="font-mono text-[11px] text-slate-500 bg-slate-50 p-8 rounded-3xl whitespace-pre-wrap leading-loose">
                 {layoutMode === 'continuous' 

@@ -7,6 +7,7 @@ export interface Figure {
   id: string;
   box_2d: [number, number, number, number]; // [ymin, xmin, ymax, xmax]
   alt: string;
+  caption: string;
 }
 
 export interface GeminiPageResponse {
@@ -43,6 +44,7 @@ export interface FigureResult {
   originalSrc: string;
   currentSrc: string;
   alt: string;
+  caption: string;
 }
 
 export interface ConversionResult {

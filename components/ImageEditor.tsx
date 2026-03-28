@@ -8,12 +8,13 @@ interface FigureToEdit {
   src: string;
   originalSrc: string;
   alt: string;
+  caption: string;
   pageIndex: number;
 }
 
 interface ImageEditorProps {
   figure: FigureToEdit;
-  onSave: (update: { figureId: string, pageIndex: number, newSrc: string, newAlt?: string }) => void;
+  onSave: (update: { figureId: string, pageIndex: number, newSrc: string, newAlt?: string, newCaption?: string }) => void;
   onClose: () => void;
   onApiCall?: (tokens?: number) => void;
 }
@@ -29,10 +30,12 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ figure, onSave, onClose, onAp
   const altPreviewRef = useRef<HTMLDivElement>(null);
   
   const [altText, setAltText] = useState<string>(figure.alt);
+  const [captionText, setCaptionText] = useState<string>(figure.caption || "Figure");
   const [editedSrc, setEditedSrc] = useState<string | null>(null);
 
   useEffect(() => {
     setAltText(figure.alt);
+    setCaptionText(figure.caption || "Figure");
   }, [figure]);
 
   useEffect(() => {
@@ -68,9 +71,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ figure, onSave, onClose, onAp
     setIsDescribing(true);
     try {
       const srcToUse = editedSrc || figure.src;
-      const { result: newDescription, tokenCount } = await describeFigure(srcToUse);
+      const { alt: newDescription, caption: newCaption, tokenCount } = await describeFigure(srcToUse);
       onApiCall?.(tokenCount);
       setAltText(newDescription);
+      setCaptionText(newCaption);
     } catch (error) {
       console.error('Description regeneration failed:', error);
       alert('Failed to regenerate description. Please try again.');
@@ -143,7 +147,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ figure, onSave, onClose, onAp
       figureId: figure.id,
       pageIndex: figure.pageIndex,
       newSrc: src,
-      newAlt: altText
+      newAlt: altText,
+      newCaption: captionText
     });
     onClose();
   };
@@ -259,7 +264,17 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ figure, onSave, onClose, onAp
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-bold text-slate-600">Description</label>
+                    <label className="text-[10px] font-bold text-slate-600">Caption (Visible)</label>
+                  </div>
+                  <input
+                    type="text"
+                    value={captionText}
+                    onChange={(e) => setCaptionText(e.target.value)}
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-purdue focus:border-purdue transition-all font-sans"
+                    placeholder="Short title for the figure..."
+                  />
+                  <div className="flex items-center justify-between mt-4">
+                    <label className="text-[10px] font-bold text-slate-600">Alt Text (Screen Readers)</label>
                     <div className="flex gap-1">
                       <button 
                         onClick={() => {

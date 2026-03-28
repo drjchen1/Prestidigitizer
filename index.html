@@ -36,12 +36,13 @@
   </script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code&family=Silkscreen&family=Pixelify+Sans:wght@400..700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;500;600;700;800;900&family=Fira+Code&display=swap');
     body { font-family: 'Inter', sans-serif; }
     .math-content { 
-      font-family: 'Crimson Pro', serif; 
-      font-size: 1.25rem;
-      line-height: 1.6;
+      font-family: 'Atkinson Hyperlegible', sans-serif; 
+      font-size: 1.125rem;
+      line-height: 1.7;
+      color: #1E293B;
     }
     .math-content .flex > *,
     .math-content .grid > * {
@@ -49,6 +50,7 @@
     }
     .math-content h1, .math-content h2, .math-content h3 {
       font-family: 'Inter', sans-serif;
+      color: #0f172a;
     }
     .math-content .notebox { 
       border-left: 4px solid #CEB888; 
@@ -96,17 +98,21 @@
     }
 
     /* Allow horizontal scrolling for wide math equations */
-    .math-content .MathJax_Display,
     .math-content mjx-container[display="true"] {
       max-width: 100%;
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 1.5rem !important;
       margin: 2rem 0 !important;
-      background: #f8fafc !important;
-      border-radius: 0.75rem !important;
-      border: 1px solid #e2e8f0 !important;
-      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+      border: none !important;
+    }
+
+    /* Safety net: prevent double-boxing if math is nested in a notebox */
+    .math-content .notebox mjx-container[display="true"] {
+      border-left: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 1rem 0 !important;
     }
 
     /* Allow horizontal scrolling for wide tables */
