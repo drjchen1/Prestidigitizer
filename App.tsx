@@ -169,9 +169,11 @@ const App: React.FC = () => {
 
       <style>{`
         @media print {
+          body, html, #root, main, .bg-\\[\\#FDFBF7\\] { background-color: white !important; }
           header, aside, button, label, .border-b { display: none !important; }
-          main, .flex-1, .w-full { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; margin: 0 !important; padding: 0 !important; }
-          article { border: none !important; padding: 0 !important; margin: 0 !important; page-break-after: always; }
+          main, .flex-1, .w-full { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+          article { border: none !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; page-break-after: always; }
+          .math-content { font-size: 12pt; }
         }
       `}</style>
     </div>

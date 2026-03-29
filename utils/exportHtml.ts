@@ -472,13 +472,20 @@ export const generateHtmlDocument = (
             .sidebar, .header, .page-badge, .no-print { display: none !important; }
             .layout { display: block; padding: 0; }
             .page-article { 
-                box-shadow: none; 
-                border: none; 
-                padding: 0; 
-                margin: 0; 
+                box-shadow: none !important; 
+                border: none !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
                 page-break-after: always; 
             }
-            .math-content { font-size: 12pt; }
+            .math-content { 
+                font-size: 12pt; 
+                box-shadow: none !important; 
+                border-radius: 0 !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+            }
+            .continuous-container { gap: 0 !important; }
         }
     </style>
 </head>
@@ -518,24 +525,37 @@ export const generateHtmlDocument = (
             ` : ''}
             <main id="main-content" class="content" style="padding-bottom: 12rem;">
                 ${layoutMode === 'continuous' ? `
-                <article role="region" class="page-article content-expanded">
-                    <div class="math-content">
-                        ${cleanResults.map((r, i) => `
-                        ${i > 0 ? `
-                        <div style="display: flex; align-items: center; justify-content: center; margin: 4rem 0; position: relative;">
-                            <div style="position: absolute; inset: 0; display: flex; align-items: center;" aria-hidden="true">
-                                <div style="width: 100%; border-top: 1px dashed #cbd5e1;"></div>
-                            </div>
-                            <div style="position: relative; display: flex; justify-content: center;">
-                                <span style="background: #ffffff; padding: 0 1rem; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Page ${r.pageNumber}</span>
-                            </div>
+                ${originalFileName ? `
+                <div class="no-print download-btn-wrapper" style="position: fixed; top: 2rem; right: 3rem; z-index: 50;">
+                    <a href="${originalFileName}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#CFB991] text-black rounded-xl font-black text-[11px] hover:bg-[#B19B69] transition-all border-2 border-black no-underline tracking-widest shadow-xl transform hover:-translate-y-0.5 active:translate-y-0" title="Download original notes">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 21v-8H7v8" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 3v5h8" />
+                        </svg>
+                        <span>Download original notes</span>
+                    </a>
+                </div>` : ''}
+                <div class="continuous-container" style="display: flex; flex-direction: column; gap: 2rem;">
+                    ${cleanResults.map((r, i) => `
+                    ${i > 0 ? `
+                    <div style="display: flex; align-items: center; justify-content: center; margin: 2rem 0; position: relative;">
+                        <div style="position: absolute; inset: 0; display: flex; align-items: center;" aria-hidden="true">
+                            <div style="width: 100%; border-top: 1px dashed #cbd5e1;"></div>
                         </div>
-                        ` : ''}
-                        <span class="sr-only">Original Page ${r.pageNumber}</span>
-                        ${r.html}
-                        `).join('\n')}
+                        <div style="position: relative; display: flex; justify-content: center;">
+                            <span style="background: var(--bg); padding: 0 1rem; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">Page ${r.pageNumber}</span>
+                        </div>
                     </div>
-                </article>
+                    ` : ''}
+                    <article role="region" class="page-article content-expanded">
+                        <span class="sr-only">Original Page ${r.pageNumber}</span>
+                        <div class="math-content">
+                            ${r.html}
+                        </div>
+                    </article>
+                    `).join('\n')}
+                </div>
                 ` : cleanResults.map((r, idx) => `
                 <article id="page-${r.pageNumber}" role="region" class="page-article">
                     ${idx === 0 && originalFileName ? `

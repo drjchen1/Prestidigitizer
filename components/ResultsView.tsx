@@ -193,7 +193,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                      {results.map((r, i) => (
                        <div key={i} className="relative">
                          {i > 0 && (
-                           <div className="flex items-center justify-center my-16 relative">
+                           <div className="flex items-center justify-center my-16 relative no-print">
                              <div className="absolute inset-0 flex items-center" aria-hidden="true">
                                <div className="w-full border-t border-dashed border-slate-300"></div>
                              </div>
