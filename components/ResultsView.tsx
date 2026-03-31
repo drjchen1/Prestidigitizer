@@ -15,6 +15,7 @@ interface ResultsViewProps {
   onShowAudit: () => void;
   onReset: () => void;
   onReprocessPage: (pageIndex: number) => void;
+  onReprocessAll: () => void;
   isProcessing: boolean;
 }
 
@@ -31,6 +32,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   onShowAudit,
   onReset,
   onReprocessPage,
+  onReprocessAll,
   isProcessing
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -127,6 +129,15 @@ const ResultsView: React.FC<ResultsViewProps> = ({
           <h3 className="font-bold text-slate-900 mb-4 text-[10px] uppercase tracking-widest">Controls</h3>
           <div className="space-y-2">
              <button onClick={onDownloadHtml} className="w-full py-2.5 bg-purdue text-black rounded-xl text-[10px] font-bold hover:brightness-95 transition-all">DOWNLOAD HTML</button>
+             <button 
+               onClick={onReprocessAll} 
+               disabled={isProcessing}
+               className="w-full py-2.5 mt-2 bg-amber-100 text-amber-900 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-amber-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+               title="Reprocess all pages with the Pro model to improve quality"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+               Reprocess All (Pro)
+             </button>
              <button 
                onClick={onReset} 
                className="w-full py-2.5 mt-4 bg-white border-2 border-slate-200 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 hover:text-slate-900 transition-all flex items-center justify-center gap-2"

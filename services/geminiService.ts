@@ -178,6 +178,45 @@ export const convertBatchToHtml = async (images: { base64: string, pageNumber: n
   }
 };
 
+export const fixTextFormatting = async (text: string, model: ModelType = 'gemini-3.1-pro-preview'): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  try {
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: {
+        parts: [
+          { text: `Fix the formatting of the following extracted text/HTML from a mathematical document. 
+          
+          RULES:
+          1. If it contains math, format it properly as LaTeX (use \\( ... \\) for inline and \\[ ... \\] for block math).
+          2. Fix any obvious OCR errors, garbled text, or broken HTML tags.
+          3. Maintain the original meaning and structure.
+          4. If you see any <mjx-container> or <math> tags in the HTML, convert them back to raw LaTeX delimiters (\\( ... \\) or \\[ ... \\]).
+          5. Return ONLY the corrected HTML/text. Do not include markdown code blocks like \`\`\`html.
+          
+          TEXT TO FIX:
+          ${text}` }
+        ]
+      },
+      config: {
+        temperature: 0.1,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+      }
+    });
+
+    let result = response.text?.trim() || text;
+    if (result.startsWith('```html')) {
+      result = result.replace(/^```html\n?/, '').replace(/\n?```$/, '');
+    } else if (result.startsWith('```')) {
+      result = result.replace(/^```\n?/, '').replace(/\n?```$/, '');
+    }
+    return result;
+  } catch (error: any) {
+    console.error('Fix text error:', error);
+    throw error;
+  }
+};
+
 export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3-flash-preview'): Promise<{alt: string, caption: string, tokenCount: number}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {

@@ -392,6 +392,19 @@ export const useDigitization = () => {
     });
   };
 
+  const updatePageHtml = useCallback((pageIndex: number, newHtml: string) => {
+    setState(prev => {
+      const newResults = [...prev.results];
+      if (newResults[pageIndex]) {
+        newResults[pageIndex] = {
+          ...newResults[pageIndex],
+          html: newHtml
+        };
+      }
+      return { ...prev, results: newResults };
+    });
+  }, []);
+
   const setModel = useCallback((model: ModelType) => {
     setState(prev => ({ ...prev, selectedModel: model }));
   }, []);
@@ -418,6 +431,7 @@ export const useDigitization = () => {
     handleFileUpload,
     reprocessPage,
     saveEditedFigure,
+    updatePageHtml,
     incrementUsage,
     setModel,
     reset

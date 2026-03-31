@@ -162,6 +162,7 @@ const App: React.FC = () => {
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
             onReprocessPage={reprocessPage}
+            onReprocessAll={() => originalFile && handleFileUpload(originalFile, 'faithful', 'gemini-3.1-pro-preview')}
             isProcessing={state.isProcessing}
           />
         )}
