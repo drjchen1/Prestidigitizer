@@ -11,6 +11,7 @@ interface AccessibilityAuditReportProps {
 
 const AccessibilityAuditReport: React.FC<AccessibilityAuditReportProps> = ({ results, activeTab, state, onClose }) => {
   const activeAudit = results[activeTab]?.audit;
+  const failingChecks = activeAudit?.checks.filter(check => !check.passed).slice(0, 3) || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
@@ -70,6 +71,33 @@ const AccessibilityAuditReport: React.FC<AccessibilityAuditReportProps> = ({ res
         </div>
 
         <div className="flex-1 overflow-y-auto p-10 space-y-8">
+          {failingChecks.length > 0 && (
+            <section className="bg-amber-50 p-8 rounded-[2rem] border border-amber-100">
+              <h3 className="text-xs font-black text-amber-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Top Fixes Needed
+              </h3>
+              <div className="grid gap-4">
+                {failingChecks.map((check, idx) => (
+                  <div key={idx} className="flex gap-4 items-start bg-white/50 p-4 rounded-2xl border border-amber-200/50">
+                    <div className="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 text-[10px] font-black">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">{check.title}</h4>
+                      <p className="text-xs text-amber-800 mt-1 font-medium leading-relaxed">
+                        <span className="font-black uppercase text-[9px] mr-1 opacity-70">Quick Fix:</span> 
+                        {check.suggestion || "Review and update the content structure."}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section>
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Detailed Checks</h3>
             <div className="grid gap-4">
