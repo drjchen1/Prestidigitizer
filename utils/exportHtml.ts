@@ -11,9 +11,6 @@ export const generateHtmlDocument = (
   const firstHeading = doc.querySelector('h1, h2, h3');
   const extractedTitle = firstHeading ? firstHeading.textContent?.trim() : 'Mathematics Course Notes';
   
-  const isLandscape = results.length > 0 && results[0].width > results[0].height;
-  const containerMaxWidth = isLandscape ? "1200px" : "896px";
-
   const cleanResults = results.map(r => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(r.html, 'text/html');
@@ -283,7 +280,7 @@ export const generateHtmlDocument = (
         }
 
         .sidebar-hidden .math-content {
-            max-width: ${containerMaxWidth};
+            max-width: 1368px;
             margin: 0 auto;
             display: block;
             padding: 1.5rem;

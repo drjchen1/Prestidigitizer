@@ -71,8 +71,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   const containerMaxWidthClass = isLandscape ? "max-w-6xl" : "max-w-4xl";
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row gap-8 items-start">
-      <aside className="w-full lg:w-64 flex-shrink-0 space-y-4 lg:sticky lg:top-24">
+    <div className="flex flex-col-reverse xl:flex-row gap-8 items-start">
+      <aside className="w-full xl:w-64 flex-shrink-0 space-y-4 xl:sticky xl:top-24">
         {layoutMode === 'paginated' && (
           <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
             <div className="flex items-center justify-between mb-4">
@@ -223,14 +223,14 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                            </div>
                          )}
                          <span className="sr-only">Original Page {r.pageNumber}</span>
-                         <article className="math-content bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100">
+                         <article className="math-content overflow-x-auto bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100">
                            <div dangerouslySetInnerHTML={{ __html: r.html.replace(/data-figure-id="([^"]+)"/g, `data-figure-id="$1" data-page-index="${i}"`) }} />
                          </article>
                        </div>
                      ))}
                    </div>
                  ) : (
-                   <article className={`math-content bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100 mx-auto ${containerMaxWidthClass}`}>
+                   <article className={`math-content overflow-x-auto bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100 mx-auto ${containerMaxWidthClass}`}>
                      <div dangerouslySetInnerHTML={{ __html: results[activeTab]?.html || '' }} />
                    </article>
                  )}
