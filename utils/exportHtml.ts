@@ -260,6 +260,11 @@ export const generateHtmlDocument = (
             color: #0f172a;
         }
 
+        .nav-link.active-nav-link {
+            background-color: var(--accent);
+            color: #000;
+        }
+
         .page-article {
             background: white;
             border-radius: 1.5rem;
@@ -609,6 +614,28 @@ export const generateHtmlDocument = (
         }
         window.addEventListener('resize', checkMobile);
         checkMobile();
+
+        if (sidebar) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        if (id) {
+                            document.querySelectorAll('.nav-link').forEach(link => {
+                                link.classList.remove('active-nav-link');
+                                if (link.getAttribute('href') === '#' + id) {
+                                    link.classList.add('active-nav-link');
+                                }
+                            });
+                        }
+                    }
+                });
+            }, { rootMargin: '-20% 0px -40% 0px' });
+
+            articles.forEach(article => {
+                if (article.id) observer.observe(article);
+            });
+        }
     </script>
 </body>
 </html>`;
