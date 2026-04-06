@@ -12,6 +12,8 @@ interface ResultsViewProps {
   setLayoutMode: (mode: LayoutMode) => void;
   onEditFigure: (pageIndex: number, figureId: string) => void;
   onDownloadHtml: () => void;
+  onDownloadMarkdown: () => void;
+  onDownloadEpub: () => void;
   onShowAudit: () => void;
   onReset: () => void;
   onReprocessPage: (pageIndex: number) => void;
@@ -29,6 +31,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   setLayoutMode,
   onEditFigure,
   onDownloadHtml,
+  onDownloadMarkdown,
+  onDownloadEpub,
   onShowAudit,
   onReset,
   onReprocessPage,
@@ -128,7 +132,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({
         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
           <h3 className="font-bold text-slate-900 mb-4 text-[10px] uppercase tracking-widest">Controls</h3>
           <div className="space-y-2">
-             <button onClick={onDownloadHtml} className="w-full py-2.5 bg-purdue text-black rounded-xl text-[10px] font-bold hover:brightness-95 transition-all">DOWNLOAD HTML</button>
+             <div className="grid grid-cols-3 gap-2">
+               <button onClick={onDownloadHtml} className="w-full py-2.5 bg-purdue text-black rounded-xl text-[10px] font-bold hover:brightness-95 transition-all">HTML</button>
+               <button onClick={onDownloadMarkdown} className="w-full py-2.5 bg-slate-800 text-white rounded-xl text-[10px] font-bold hover:bg-slate-700 transition-all">MD</button>
+               <button onClick={onDownloadEpub} className="w-full py-2.5 bg-slate-800 text-white rounded-xl text-[10px] font-bold hover:bg-slate-700 transition-all">EPUB</button>
+             </div>
              <button 
                onClick={onReprocessAll} 
                disabled={isProcessing}

@@ -13,6 +13,8 @@ import Footer from './components/Footer';
 import { useDigitization } from './hooks/useDigitization';
 import { ModelType, LayoutMode } from './types';
 import { generateHtmlDocument } from './utils/exportHtml';
+import { generateMarkdownDocument } from './utils/exportMarkdown';
+import { generateEpubDocument } from './utils/exportEpub';
 
 const App: React.FC = () => {
   const {
@@ -77,6 +79,31 @@ const App: React.FC = () => {
     link.href = url;
     const baseFileName = originalFile ? originalFile.name.replace(/\.[^/.]+$/, "") : `math_notes_${new Date().getTime()}`;
     link.download = `${baseFileName}-acc.html`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setHasDownloaded(true);
+  };
+
+  const handleDownloadMarkdown = () => {
+    const markdown = generateMarkdownDocument(state.results, originalFile?.name || '');
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const baseFileName = originalFile ? originalFile.name.replace(/\.[^/.]+$/, "") : `math_notes_${new Date().getTime()}`;
+    link.download = `${baseFileName}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setHasDownloaded(true);
+  };
+
+  const handleDownloadEpub = async () => {
+    const blob = await generateEpubDocument(state.results, originalFile?.name || '');
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const baseFileName = originalFile ? originalFile.name.replace(/\.[^/.]+$/, "") : `math_notes_${new Date().getTime()}`;
+    link.download = `${baseFileName}.epub`;
     link.click();
     URL.revokeObjectURL(url);
     setHasDownloaded(true);
@@ -157,6 +184,8 @@ const App: React.FC = () => {
             setViewMode={setViewMode}
             onEditFigure={handleEditFigure}
             onDownloadHtml={handleDownloadHtml}
+            onDownloadMarkdown={handleDownloadMarkdown}
+            onDownloadEpub={handleDownloadEpub}
             onShowAudit={() => setShowAuditReport(true)}
             onReset={handleReset}
             layoutMode={layoutMode}
