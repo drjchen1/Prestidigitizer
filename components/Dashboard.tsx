@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 interface DashboardProps {
-  onFileUpload: (file: File) => void;
+  onFileUpload: (files: File[]) => void;
   isProcessing: boolean;
   onShowDocs: () => void;
 }
@@ -11,9 +11,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      onFileUpload(file);
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      onFileUpload(files);
     }
   };
 
@@ -36,9 +36,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
 
     if (isProcessing) return;
 
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      onFileUpload(file);
+    const files = Array.from(e.dataTransfer.files || []);
+    if (files.length > 0) {
+      onFileUpload(files);
     }
   };
 
@@ -71,8 +71,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
         
         <div>
           <label className="inline-flex items-center justify-center w-full sm:w-auto px-8 md:px-12 py-4 md:py-5 bg-purdue hover:brightness-95 text-black font-bold rounded-xl md:rounded-2xl shadow-xl transition-all cursor-pointer">
-            <span className="text-sm md:text-base">Upload File</span>
-            <input type="file" className="sr-only" accept="application/pdf,image/*,.heic,.heif,.txt" onChange={handleFileChange} disabled={isProcessing} />
+            <span className="text-sm md:text-base">Upload File(s)</span>
+            <input type="file" multiple className="sr-only" accept="application/pdf,image/*,.heic,.heif,.txt" onChange={handleFileChange} disabled={isProcessing} />
           </label>
         </div>
       </div>

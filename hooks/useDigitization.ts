@@ -18,11 +18,12 @@ export const useDigitization = () => {
     statusMessage: 'Waiting for upload...',
     sessionRequestCount: 0,
     dailyRequestCount: 0,
-    selectedModel: 'gemini-3-flash-preview'
+    selectedModel: 'gemini-flash-latest'
   });
 
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [originalFiles, setOriginalFiles] = useState<File[]>([]);
+  const [pageMapping, setPageMapping] = useState<{fileIndex: number, localPageIndex: number}[]>([]);
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -65,10 +66,10 @@ export const useDigitization = () => {
     });
   }, []);
 
-  const handleFileUpload = async (file: File, languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview') => {
-    if (!file) return;
+  const handleFileUpload = async (files: File[], languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-flash-latest') => {
+    if (!files || files.length === 0) return;
 
-    setOriginalFile(file);
+    setOriginalFiles(files);
     const startTime = Date.now();
     setState(prev => ({
       ...prev,
@@ -76,11 +77,22 @@ export const useDigitization = () => {
       progress: 0,
       results: [],
       error: null,
-      statusMessage: 'Reading file...'
+      statusMessage: 'Reading files...'
     }));
 
     try {
-      const pageData = await pdfToImageData(file, true);
+      let pageData: any[] = [];
+      const mapping: {fileIndex: number, localPageIndex: number}[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const data = await pdfToImageData(files[i], true);
+        pageData = pageData.concat(data);
+        for (let j = 0; j < data.length; j++) {
+          mapping.push({ fileIndex: i, localPageIndex: j });
+        }
+      }
+      setPageMapping(mapping);
+      
       const totalPages = pageData.length;
       
       setState(prev => ({ ...prev, progress: 10, statusMessage: 'Analyzing document structure...' }));
@@ -245,8 +257,10 @@ export const useDigitization = () => {
     }
   };
 
-  const reprocessPage = async (pageIndex: number, model: ModelType = 'gemini-3.1-pro-preview') => {
-    if (!originalFile) return;
+  const reprocessPage = async (pageIndex: number, model: ModelType = 'gemini-pro-latest') => {
+    if (!originalFiles || originalFiles.length === 0) return;
+    const mapping = pageMapping[pageIndex];
+    if (!mapping) return;
 
     setState(prev => ({
       ...prev,
@@ -257,7 +271,8 @@ export const useDigitization = () => {
 
     try {
       // Extract just the one page we need
-      const pageData = await pdfToImageData(originalFile, true, [pageIndex + 1]);
+      const file = originalFiles[mapping.fileIndex];
+      const pageData = await pdfToImageData(file, true, [mapping.localPageIndex + 1]);
       if (!pageData || pageData.length === 0) throw new Error("Could not extract page data");
 
       setState(prev => ({ ...prev, progress: 20 }));
@@ -420,14 +435,15 @@ export const useDigitization = () => {
       dailyRequestCount: prev.dailyRequestCount, // Keep daily count
       selectedModel: prev.selectedModel // Keep selected model
     }));
-    setOriginalFile(null);
+    setOriginalFiles([]);
+    setPageMapping([]);
     setElapsedTime(0);
   }, []);
 
   return {
     state,
     elapsedTime,
-    originalFile,
+    originalFiles,
     handleFileUpload,
     reprocessPage,
     saveEditedFigure,

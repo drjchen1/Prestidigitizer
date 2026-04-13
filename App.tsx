@@ -19,7 +19,7 @@ import { generateEpubDocument } from './utils/exportEpub';
 const App: React.FC = () => {
   const {
     state,
-    originalFile,
+    originalFiles,
     handleFileUpload,
     reprocessPage,
     saveEditedFigure,
@@ -72,12 +72,13 @@ const App: React.FC = () => {
   };
 
   const handleDownloadHtml = () => {
-    const template = generateHtmlDocument(state.results, originalFile?.name || '', layoutMode);
+    const originalFileName = originalFiles && originalFiles.length > 0 ? originalFiles[0].name : '';
+    const template = generateHtmlDocument(state.results, originalFileName, layoutMode);
     const blob = new Blob([template], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    const baseFileName = originalFile ? originalFile.name.replace(/\.[^/.]+$/, "") : `math_notes_${new Date().getTime()}`;
+    const baseFileName = originalFileName ? originalFileName.replace(/\.[^/.]+$/, "") : `math_notes_${new Date().getTime()}`;
     link.download = `${baseFileName}-acc.html`;
     link.click();
     URL.revokeObjectURL(url);
@@ -166,7 +167,7 @@ const App: React.FC = () => {
         {!state.results.length && !state.isProcessing ? (
           <>
             <Dashboard 
-              onFileUpload={(file) => handleFileUpload(file, 'faithful', state.selectedModel)} 
+              onFileUpload={(files) => handleFileUpload(files, 'faithful', state.selectedModel)} 
               isProcessing={state.isProcessing} 
               onShowDocs={() => setShowHelp(true)}
             />
@@ -191,7 +192,7 @@ const App: React.FC = () => {
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
             onReprocessPage={reprocessPage}
-            onReprocessAll={() => originalFile && handleFileUpload(originalFile, 'faithful', 'gemini-3.1-pro-preview')}
+            onReprocessAll={() => originalFiles && originalFiles.length > 0 && handleFileUpload(originalFiles, 'faithful', 'gemini-pro-latest')}
             isProcessing={state.isProcessing}
           />
         )}

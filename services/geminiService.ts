@@ -73,7 +73,7 @@ CRITICAL: Do not include any internal monologue, reasoning, or "thinking" proces
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', retries = 3): Promise<{text: string, tokenCount: number}> {
+async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-pro-latest', retries = 3): Promise<{text: string, tokenCount: number}> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   for (let i = 0; i < retries; i++) {
@@ -166,7 +166,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
   throw new Error("Max retries exceeded");
 }
 
-export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview'): Promise<BatchResponse> => {
+export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-pro-latest'): Promise<BatchResponse> => {
   let result = { text: "", tokenCount: 0 };
   try {
     result = await callBatchGeminiWithRetry(images, model);
@@ -178,7 +178,7 @@ export const convertBatchToHtml = async (images: { base64: string, pageNumber: n
   }
 };
 
-export const fixTextFormatting = async (text: string, model: ModelType = 'gemini-3.1-pro-preview'): Promise<string> => {
+export const fixTextFormatting = async (text: string, model: ModelType = 'gemini-pro-latest'): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
@@ -217,7 +217,7 @@ export const fixTextFormatting = async (text: string, model: ModelType = 'gemini
   }
 };
 
-export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3-flash-preview'): Promise<{alt: string, caption: string, tokenCount: number}> => {
+export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-flash-latest'): Promise<{alt: string, caption: string, tokenCount: number}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
