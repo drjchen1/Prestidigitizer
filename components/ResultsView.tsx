@@ -206,7 +206,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 
           <div className="min-h-[800px] pb-32">
             {viewMode === 'preview' ? (
-              <div ref={contentRef} className="bg-[#FDFBF7] p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 w-full">
+              <div ref={contentRef} className="bg-[#FDFBF7] p-2 md:p-8 lg:p-12 rounded-3xl shadow-sm border border-slate-100 w-full">
                  {layoutMode === 'continuous' ? (
                    <div className={`space-y-0 ${containerMaxWidthClass} mx-auto`}>
                      {results.map((r, i) => (
@@ -231,14 +231,14 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                            </div>
                          )}
                          <span className="sr-only">Original Page {r.pageNumber}</span>
-                         <article className="math-content overflow-x-auto bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100">
+                         <article className="math-content overflow-x-auto bg-white p-4 md:p-8 lg:p-12 rounded-2xl shadow-md border border-slate-100">
                            <div dangerouslySetInnerHTML={{ __html: r.html.replace(/data-figure-id="([^"]+)"/g, `data-figure-id="$1" data-page-index="${i}"`) }} />
                          </article>
                        </div>
                      ))}
                    </div>
                  ) : (
-                   <article className={`math-content overflow-x-auto bg-white p-8 md:p-12 rounded-2xl shadow-md border border-slate-100 mx-auto ${containerMaxWidthClass}`}>
+                   <article className={`math-content overflow-x-auto bg-white p-4 md:p-8 lg:p-12 rounded-2xl shadow-md border border-slate-100 mx-auto ${containerMaxWidthClass}`}>
                      <div dangerouslySetInnerHTML={{ __html: results[activeTab]?.html || '' }} />
                    </article>
                  )}

@@ -25,6 +25,8 @@ const App: React.FC = () => {
     saveEditedFigure,
     incrementUsage,
     setModel,
+    setDocumentType,
+    setTranscriptionStyle,
     reset
   } = useDigitization();
 
@@ -167,13 +169,17 @@ const App: React.FC = () => {
         {!state.results.length && !state.isProcessing ? (
           <>
             <Dashboard 
-              onFileUpload={(files) => handleFileUpload(files, 'faithful', state.selectedModel)} 
+              onFileUpload={(files) => handleFileUpload(files, 'faithful', state.selectedModel, state.documentType, state.transcriptionStyle)} 
               isProcessing={state.isProcessing} 
               onShowDocs={() => setShowHelp(true)}
             />
             <Footer 
               selectedModel={state.selectedModel} 
               onModelChange={setModel} 
+              documentType={state.documentType}
+              onDocumentTypeChange={setDocumentType}
+              transcriptionStyle={state.transcriptionStyle}
+              onTranscriptionStyleChange={setTranscriptionStyle}
             />
           </>
         ) : (
@@ -192,7 +198,7 @@ const App: React.FC = () => {
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
             onReprocessPage={reprocessPage}
-            onReprocessAll={() => originalFiles && originalFiles.length > 0 && handleFileUpload(originalFiles, 'faithful', 'gemini-pro-latest')}
+            onReprocessAll={() => originalFiles && originalFiles.length > 0 && handleFileUpload(originalFiles, 'faithful', 'gemini-3.1-pro-preview', state.documentType, state.transcriptionStyle)}
             isProcessing={state.isProcessing}
           />
         )}

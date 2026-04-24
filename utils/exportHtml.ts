@@ -452,6 +452,30 @@ export const generateHtmlDocument = (
             border: none !important;
             overflow-x: auto !important;
             overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 640px) {
+            .math-content h1 { font-size: 1.75rem; margin-bottom: 1.5rem; }
+            .math-content h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; }
+            .math-content h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+            .math-content .notebox { 
+                padding: 1.25rem; 
+                margin: 1.5rem 0; 
+                border-radius: 0.5rem;
+                border-left-width: 3px;
+            }
+            .sidebar-hidden .math-content {
+                padding: 1rem;
+            }
+            .page-article {
+                padding: 1rem;
+                border-radius: 1rem;
+            }
+            mjx-container[display="true"] {
+                margin: 1rem 0 !important;
+            }
         }
 
         /* Fix alignment for math in flex containers */

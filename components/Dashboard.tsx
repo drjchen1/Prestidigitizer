@@ -68,6 +68,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onFileUpload, isProcessing, onSho
         <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-8 whitespace-normal md:whitespace-nowrap">
           Ready to <span className="text-purdue font-bold">Digitize.</span>
         </h2>
+        <p className="text-slate-600 mb-8 max-w-md mx-auto">
+          Upload handwritten notes or printed documents. We'll convert them into accessible HTML with LaTeX math.
+        </p>
         
         <div>
           <label className="inline-flex items-center justify-center w-full sm:w-auto px-8 md:px-12 py-4 md:py-5 bg-purdue hover:brightness-95 text-black font-bold rounded-xl md:rounded-2xl shadow-xl transition-all cursor-pointer">

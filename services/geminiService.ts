@@ -1,14 +1,18 @@
 
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
-import { GeminiPageResponse, BatchResponse, ModelType } from "../types";
+import { GeminiPageResponse, BatchResponse, ModelType, DocumentType, TranscriptionStyle } from "../types";
 
-const getSystemInstruction = () => {
+const getSystemInstruction = (docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim') => {
+  const docDescription = docType === 'handwritten' 
+    ? "scanned handwritten mathematics lecture notes" 
+    : "printed or typed mathematics documents (e.g., PDFs, textbooks, assignments)";
+
   return `
 You are a world-class specialist in mathematics education and web accessibility (WCAG 2.2 AA). 
-Your task is to convert scanned handwritten mathematics lecture notes into a high-fidelity, accessible HTML document.
+Your task is to convert ${docDescription} into a high-fidelity, accessible HTML document.
 
 Rules:
-1. FAITHFULNESS & ADAPTIVE LAYOUT: Transcribe the author's original wording and shorthand as faithfully as possible. Do not rewrite, heavily rephrase, or expand shorthand into full sentences unless fixing an obvious typo. However, you MAY adapt the spatial layout and formatting to enhance web clarity and accessibility.
+1. FAITHFULNESS & ADAPTIVE LAYOUT: ${transcriptionStyle === 'audio_optimized' ? "While you MUST preserve all mathematical formulas, equations, and definitions exactly, you MUST slightly rephrase the surrounding narrative text and expand shorthand to optimize it for screen readers and audio playback. Do not output the narrative text exactly as written." : "Transcribe the author's original wording and shorthand as faithfully as possible. Do not rewrite, heavily rephrase, or expand shorthand into full sentences unless fixing an obvious typo."} However, you MAY adapt the spatial layout and formatting to enhance web clarity and accessibility.
     - If text and a figure appear side-by-side in the notes, use Tailwind grid classes (e.g., <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">) to replicate this layout.
     - If an equation and an annotation (text with an arrow) appear side-by-side, you may preserve the spatial relationship using a flexbox container OR convert the annotation into a clear text note immediately below the equation if it improves readability on a screen.
 
@@ -19,20 +23,20 @@ Rules:
 
 3. UNIVERSAL DESIGN & AESTHETICS (BEAUTIFUL & ACCESSIBLE):
    - TYPOGRAPHY: Use 'font-sans' for a clean, readable look. For headings, use 'font-black tracking-tight text-slate-900'.
-   - SPACING: Use standard Tailwind spacing (e.g., 'space-y-4', 'mb-6', 'mt-8') to group related concepts logically, matching the visual flow of the handwritten page.
+   - SPACING: Use standard Tailwind spacing (e.g., 'space-y-4', 'mb-6', 'mt-8') to group related concepts logically, matching the visual flow of the original page.
    - VISUAL HIERARCHY: Use 'italic text-slate-700 my-8' for important theorems or definitions. Do NOT use any left borders or gold colors here; reserve the gold bar exclusively for the '<div class="notebox">' used for explicitly boxed notes.
    - LISTS: Use 'list-disc list-outside ml-6 space-y-2 mb-6' for unordered lists to ensure proper text wrapping and readability.
    - NOTEPADS/BOXES: For boxed annotations or important notes, use '<div class="notebox">'. NEVER use green backgrounds or borders.
 4. MATHEMATICS (CRITICAL): Convert all mathematical expressions into LaTeX. 
    - PREFER INLINE MATH: Use \\( ... \\) for variables, short expressions, or any math that is part of a sentence to maintain a natural, cohesive flow.
    - BLOCK MATH: Use '\\[ ... \\]' for standalone block math. 
-     - If the equation is NOT boxed in the handwritten notes, do not wrap it in any HTML tags. 
-     - If the equation IS explicitly boxed or highlighted as a key result in the notes, wrap it in '<div class="notebox">'.
+     - If the equation is NOT boxed in the original document, do not wrap it in any HTML tags. 
+     - If the equation IS explicitly boxed or highlighted as a key result, wrap it in '<div class="notebox">'.
    - UNDERBRACES AND OVERBRACES: Use \\underbrace{...}_{\\text{...}} or \\overbrace{...}^{\\text{...}} in LaTeX to represent curly brackets under or over math expressions. You may adjust the exact grouping slightly if it improves mathematical clarity or fixes an obvious mistake.
-   - ARROWS AND LABELS IN EQUATIONS: When handwritten notes use arrows to point to parts of an equation, prioritize clarity and readability over strict spatial replication:
+   - ARROWS AND LABELS IN EQUATIONS: When the document uses arrows to point to parts of an equation, prioritize clarity and readability over strict spatial replication:
      - You have the freedom to convert messy spatial annotations into clean, structured text immediately below the equation (e.g., "Note: \\(-py\\) acts as reduction to growth rate") using the author's original wording.
      - Alternatively, if it makes the mathematical meaning clearer, use \\overbrace, \\underbrace, \\underset, or \\overset in LaTeX.
-     - If preserving the side-by-side layout is best, use HTML flexbox (e.g., <div class="flex items-center gap-4"><div>\\[ math \\]</div><div class="text-sm text-slate-600">\\(\\leftarrow\\) your text</div></div>).
+     - If preserving the side-by-side layout is best, use HTML flexbox (e.g., <div class="flex flex-col md:flex-row md:items-center gap-4"><div>\\[ math \\]</div><div class="text-sm text-slate-600">\\(\\leftarrow\\) your text</div></div>).
    - Ensure backslashes are present for all functions (e.g., \\sin, \\cos, \\log, \\sqrt, \\times).
    - Double check that delimiters are NOT missing.
 
@@ -73,7 +77,7 @@ CRITICAL: Do not include any internal monologue, reasoning, or "thinking" proces
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-pro-latest', retries = 3): Promise<{text: string, tokenCount: number}> {
+async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim', retries = 3): Promise<{text: string, tokenCount: number}> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   for (let i = 0; i < retries; i++) {
@@ -91,7 +95,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
       ]);
 
       parts.push({ text: `Analyze these ${images.length} pages in order. 
-      CRITICAL: Hand-drawn circles, arrows, and grouping brackets are annotations, NOT figures. 
+      CRITICAL: Hand-drawn or printed circles, arrows, and grouping brackets are annotations, NOT figures. 
       Labels like "Option 2" in boxes are text content and must be transcribed directly into HTML. 
       Only extract coordinate graphs or scientific drawings as figures. 
       Return a JSON object with a 'pages' property containing exactly ${images.length} page results in the same order as provided.
@@ -101,7 +105,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
         model: model,
         contents: { parts },
         config: {
-          systemInstruction: getSystemInstruction() + "\nIMPORTANT: Return a JSON object with a 'pages' property containing an array of page results. Each page result must have 'html' and 'figures' properties.",
+          systemInstruction: getSystemInstruction(docType, transcriptionStyle) + "\nIMPORTANT: Return a JSON object with a 'pages' property containing an array of page results. Each page result must have 'html' and 'figures' properties.",
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,
@@ -166,10 +170,10 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
   throw new Error("Max retries exceeded");
 }
 
-export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-pro-latest'): Promise<BatchResponse> => {
+export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim'): Promise<BatchResponse> => {
   let result = { text: "", tokenCount: 0 };
   try {
-    result = await callBatchGeminiWithRetry(images, model);
+    result = await callBatchGeminiWithRetry(images, model, docType, transcriptionStyle);
     const parsed = JSON.parse(result.text);
     return { pages: parsed.pages as GeminiPageResponse[], tokenCount: result.tokenCount };
   } catch (error: any) {
@@ -178,7 +182,7 @@ export const convertBatchToHtml = async (images: { base64: string, pageNumber: n
   }
 };
 
-export const fixTextFormatting = async (text: string, model: ModelType = 'gemini-pro-latest'): Promise<string> => {
+export const fixTextFormatting = async (text: string, model: ModelType = 'gemini-3.1-pro-preview'): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
@@ -217,7 +221,7 @@ export const fixTextFormatting = async (text: string, model: ModelType = 'gemini
   }
 };
 
-export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-flash-latest'): Promise<{alt: string, caption: string, tokenCount: number}> => {
+export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3-flash-preview'): Promise<{alt: string, caption: string, tokenCount: number}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppState, ConversionResult, LanguageLevel, ModelType } from '../types';
+import { AppState, ConversionResult, LanguageLevel, ModelType, DocumentType, TranscriptionStyle } from '../types';
 import { pdfToImageData } from '../services/pdfService';
 import { convertBatchToHtml } from '../services/geminiService';
 import { runAccessibilityAudit } from '../utils/accessibility';
@@ -18,7 +18,9 @@ export const useDigitization = () => {
     statusMessage: 'Waiting for upload...',
     sessionRequestCount: 0,
     dailyRequestCount: 0,
-    selectedModel: 'gemini-flash-latest'
+    selectedModel: 'gemini-3-flash-preview',
+    documentType: 'handwritten',
+    transcriptionStyle: 'verbatim'
   });
 
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -66,7 +68,7 @@ export const useDigitization = () => {
     });
   }, []);
 
-  const handleFileUpload = async (files: File[], languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-flash-latest') => {
+  const handleFileUpload = async (files: File[], languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim') => {
     if (!files || files.length === 0) return;
 
     setOriginalFiles(files);
@@ -128,7 +130,7 @@ export const useDigitization = () => {
             statusMessage: `Digitizing Pages ${batchIndices.map(i => i + 1).join(', ')}...`,
           }));
 
-          const batchResponses = await convertBatchToHtml(batchImages, model);
+          const batchResponses = await convertBatchToHtml(batchImages, model, docType, transcriptionStyle);
           incrementUsage();
 
           setState(prev => ({ 
@@ -257,7 +259,7 @@ export const useDigitization = () => {
     }
   };
 
-  const reprocessPage = async (pageIndex: number, model: ModelType = 'gemini-pro-latest') => {
+  const reprocessPage = async (pageIndex: number, model: ModelType = 'gemini-3.1-pro-preview') => {
     if (!originalFiles || originalFiles.length === 0) return;
     const mapping = pageMapping[pageIndex];
     if (!mapping) return;
@@ -282,7 +284,7 @@ export const useDigitization = () => {
 
       setState(prev => ({ ...prev, progress: 40 }));
 
-      const batchResponses = await convertBatchToHtml(batchImages, model);
+      const batchResponses = await convertBatchToHtml(batchImages, model, state.documentType, state.transcriptionStyle);
       incrementUsage();
 
       setState(prev => ({ ...prev, progress: 80 }));
@@ -424,6 +426,14 @@ export const useDigitization = () => {
     setState(prev => ({ ...prev, selectedModel: model }));
   }, []);
 
+  const setDocumentType = useCallback((docType: DocumentType) => {
+    setState(prev => ({ ...prev, documentType: docType }));
+  }, []);
+
+  const setTranscriptionStyle = useCallback((style: TranscriptionStyle) => {
+    setState(prev => ({ ...prev, transcriptionStyle: style }));
+  }, []);
+
   const reset = useCallback(() => {
     setState(prev => ({
       isProcessing: false,
@@ -433,7 +443,9 @@ export const useDigitization = () => {
       statusMessage: 'Waiting for upload...',
       sessionRequestCount: 0,
       dailyRequestCount: prev.dailyRequestCount, // Keep daily count
-      selectedModel: prev.selectedModel // Keep selected model
+      selectedModel: prev.selectedModel, // Keep selected model
+      documentType: prev.documentType,
+      transcriptionStyle: prev.transcriptionStyle
     }));
     setOriginalFiles([]);
     setPageMapping([]);
@@ -450,6 +462,8 @@ export const useDigitization = () => {
     updatePageHtml,
     incrementUsage,
     setModel,
+    setDocumentType,
+    setTranscriptionStyle,
     reset
   };
 };
