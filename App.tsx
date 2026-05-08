@@ -25,6 +25,7 @@ const App: React.FC = () => {
     setModel,
     setDocumentType,
     setTranscriptionStyle,
+    setThinkingMode,
     reset
   } = useDigitization();
 
@@ -153,6 +154,8 @@ const App: React.FC = () => {
               onDocumentTypeChange={setDocumentType}
               transcriptionStyle={state.transcriptionStyle}
               onTranscriptionStyleChange={setTranscriptionStyle}
+              thinkingMode={state.thinkingMode}
+              onThinkingModeChange={setThinkingMode}
             />
           </>
         ) : (

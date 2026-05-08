@@ -4,6 +4,7 @@ export type ModelType = 'gemini-3-flash-preview' | 'gemini-3.1-flash-lite-previe
 export type LayoutMode = 'paginated' | 'continuous';
 export type DocumentType = 'handwritten' | 'printed';
 export type TranscriptionStyle = 'verbatim' | 'audio_optimized';
+export type ThinkingMode = 'auto' | 'low' | 'high';
 
 export interface Figure {
   id: string;
@@ -70,6 +71,7 @@ export interface AppState {
   selectedModel: ModelType;
   documentType: DocumentType;
   transcriptionStyle: TranscriptionStyle;
+  thinkingMode: ThinkingMode;
 }
 
 declare global {

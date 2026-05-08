@@ -526,6 +526,10 @@ export const generateHtmlDocument = (
                     Toggle Sidebar
                 </button>
                 ` : ''}
+                <button id="read-aloud-btn" class="btn btn-outline" aria-label="Read contents aloud">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                    Read Aloud
+                </button>
                 <button onclick="window.print()" class="btn btn-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                     Print PDF
@@ -658,6 +662,30 @@ export const generateHtmlDocument = (
 
             articles.forEach(article => {
                 if (article.id) observer.observe(article);
+            });
+        }
+
+        const readAloudBtn = document.getElementById('read-aloud-btn');
+        let synth = window.speechSynthesis;
+        let isPlaying = false;
+        
+        if (readAloudBtn) {
+            readAloudBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    synth.cancel();
+                    isPlaying = false;
+                    readAloudBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg> Read Aloud';
+                } else {
+                    const text = Array.from(document.querySelectorAll('.math-content')).map(el => el.textContent || '').join(' ');
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.onend = () => {
+                        isPlaying = false;
+                        readAloudBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg> Read Aloud';
+                    };
+                    synth.speak(utterance);
+                    isPlaying = true;
+                    readAloudBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg> Stop Reading';
+                }
             });
         }
     </script>

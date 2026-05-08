@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
-import { GeminiPageResponse, BatchResponse, ModelType, DocumentType, TranscriptionStyle } from "../types";
+import { GeminiPageResponse, BatchResponse, ModelType, DocumentType, TranscriptionStyle, ThinkingMode } from "../types";
 
 const getSystemInstruction = (docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim') => {
   const docDescription = docType === 'handwritten' 
@@ -77,17 +77,24 @@ CRITICAL: Do not include any internal monologue, reasoning, or "thinking" proces
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim', retries = 3): Promise<{text: string, tokenCount: number}> {
+async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim', thinkingMode: ThinkingMode = 'auto', retries = 3): Promise<{text: string, tokenCount: number}> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   for (let i = 0; i < retries; i++) {
     try {
-      // Tweak 5: Adaptive Thinking Levels
-      // Start with LOW to minimize latency. If it's a retry, we might want to increase it, 
-      // but for now we'll stick to the user's request of "adaptive" based on complexity.
-      // Since we can't pre-detect, we'll use LOW for the first attempt and HIGH for retries 
-      // if the error suggests complexity issues.
-      const currentThinkingLevel = i === 0 ? ThinkingLevel.LOW : ThinkingLevel.HIGH;
+      // Dynamic Thinking Level configuration
+      let currentThinkingLevel;
+      if (model !== 'gemini-3.1-pro-preview') {
+        currentThinkingLevel = undefined; // Not supported or default MINIMAL on lite/flash
+      } else {
+        if (thinkingMode === 'auto') {
+          currentThinkingLevel = undefined; // Let the model decide automatically
+        } else if (thinkingMode === 'low') {
+          currentThinkingLevel = ThinkingLevel.LOW;
+        } else if (thinkingMode === 'high') {
+          currentThinkingLevel = ThinkingLevel.HIGH;
+        }
+      }
 
       const parts = images.flatMap(img => [
         { inlineData: { mimeType: 'image/jpeg', data: img.base64 } },
@@ -143,7 +150,7 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
           },
           temperature: 0.1,
           maxOutputTokens: 65536,
-          thinkingConfig: { thinkingLevel: currentThinkingLevel }
+          ...(currentThinkingLevel ? { thinkingConfig: { thinkingLevel: currentThinkingLevel } } : {})
         }
       });
 
@@ -170,10 +177,10 @@ async function callBatchGeminiWithRetry(images: { base64: string, pageNumber: nu
   throw new Error("Max retries exceeded");
 }
 
-export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim'): Promise<BatchResponse> => {
+export const convertBatchToHtml = async (images: { base64: string, pageNumber: number }[], model: ModelType = 'gemini-3.1-pro-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim', thinkingMode: ThinkingMode = 'auto'): Promise<BatchResponse> => {
   let result = { text: "", tokenCount: 0 };
   try {
-    result = await callBatchGeminiWithRetry(images, model, docType, transcriptionStyle);
+    result = await callBatchGeminiWithRetry(images, model, docType, transcriptionStyle, thinkingMode);
     const parsed = JSON.parse(result.text);
     return { pages: parsed.pages as GeminiPageResponse[], tokenCount: result.tokenCount };
   } catch (error: any) {
@@ -221,11 +228,11 @@ export const fixTextFormatting = async (text: string, model: ModelType = 'gemini
   }
 };
 
-export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3-flash-preview'): Promise<{alt: string, caption: string, tokenCount: number}> => {
+export const describeFigure = async (base64Image: string, model: ModelType = 'gemini-3.1-pro-preview'): Promise<{alt: string, caption: string, tokenCount: number}> => {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview', // Hardcoded to flash for cost savings
+      model: model,
       contents: {
         parts: [
           { inlineData: { mimeType: 'image/png', data: base64Image.split(',')[1] || base64Image } },

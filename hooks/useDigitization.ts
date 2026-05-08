@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { AppState, ConversionResult, LanguageLevel, ModelType, DocumentType, TranscriptionStyle } from '../types';
+import { AppState, ConversionResult, LanguageLevel, ModelType, DocumentType, TranscriptionStyle, ThinkingMode } from '../types';
 import { pdfToImageData } from '../services/pdfService';
 import { convertBatchToHtml } from '../services/geminiService';
 import { runAccessibilityAudit } from '../utils/accessibility';
@@ -20,7 +20,8 @@ export const useDigitization = () => {
     dailyRequestCount: 0,
     selectedModel: 'gemini-3-flash-preview',
     documentType: 'handwritten',
-    transcriptionStyle: 'verbatim'
+    transcriptionStyle: 'verbatim',
+    thinkingMode: 'auto'
   });
 
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -68,7 +69,7 @@ export const useDigitization = () => {
     });
   }, []);
 
-  const handleFileUpload = async (files: File[], languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim') => {
+  const handleFileUpload = async (files: File[], languageLevel: LanguageLevel = 'faithful', model: ModelType = 'gemini-3-flash-preview', docType: DocumentType = 'handwritten', transcriptionStyle: TranscriptionStyle = 'verbatim', thinkingMode: ThinkingMode = 'auto') => {
     if (!files || files.length === 0) return;
 
     setOriginalFiles(files);
@@ -130,7 +131,7 @@ export const useDigitization = () => {
             statusMessage: `Digitizing Pages ${batchIndices.map(i => i + 1).join(', ')}...`,
           }));
 
-          const batchResponses = await convertBatchToHtml(batchImages, model, docType, transcriptionStyle);
+          const batchResponses = await convertBatchToHtml(batchImages, model, docType, transcriptionStyle, thinkingMode);
           incrementUsage();
 
           setState(prev => ({ 
@@ -284,7 +285,7 @@ export const useDigitization = () => {
 
       setState(prev => ({ ...prev, progress: 40 }));
 
-      const batchResponses = await convertBatchToHtml(batchImages, model, state.documentType, state.transcriptionStyle);
+      const batchResponses = await convertBatchToHtml(batchImages, model, state.documentType, state.transcriptionStyle, state.thinkingMode);
       incrementUsage();
 
       setState(prev => ({ ...prev, progress: 80 }));
@@ -434,6 +435,10 @@ export const useDigitization = () => {
     setState(prev => ({ ...prev, transcriptionStyle: style }));
   }, []);
 
+  const setThinkingMode = useCallback((mode: ThinkingMode) => {
+    setState(prev => ({ ...prev, thinkingMode: mode }));
+  }, []);
+
   const reset = useCallback(() => {
     setState(prev => ({
       isProcessing: false,
@@ -445,7 +450,8 @@ export const useDigitization = () => {
       dailyRequestCount: prev.dailyRequestCount, // Keep daily count
       selectedModel: prev.selectedModel, // Keep selected model
       documentType: prev.documentType,
-      transcriptionStyle: prev.transcriptionStyle
+      transcriptionStyle: prev.transcriptionStyle,
+      thinkingMode: prev.thinkingMode
     }));
     setOriginalFiles([]);
     setPageMapping([]);
@@ -464,6 +470,7 @@ export const useDigitization = () => {
     setModel,
     setDocumentType,
     setTranscriptionStyle,
+    setThinkingMode,
     reset
   };
 };
